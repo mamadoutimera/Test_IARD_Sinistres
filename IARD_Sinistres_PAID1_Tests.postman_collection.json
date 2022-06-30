@@ -1,0 +1,2982 @@
+{
+	"info": {
+		"_postman_id": "f98276b6-b355-4501-9d37-051b63a9c7d8",
+		"name": "IARD_Sinistres_PAID1_Tests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "21440125"
+	},
+	"item": [
+		{
+			"name": "Connexion et initialisation",
+			"item": [
+				{
+					"name": "Connexion CLEVA",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"token\", pm.response.text());",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"console.log(pm.response.text());"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const moment = require('moment');\r",
+									"pm.collectionVariables.set(\"dateDuJour\", moment().format(\"YYYY-MM-DD\"));\r",
+									"pm.collectionVariables.set(\"dateDuJour_Plus_1_Mois\", moment().add(30, 'days').format(\"YYYY-MM-DD\"));\r",
+									"pm.collectionVariables.set(\"dateDuJour_Plus_6_Mois\", moment().add(180, 'days').format(\"YYYY-MM-DD\"));\r",
+									"pm.collectionVariables.set(\"dateDuJour_Moins_1_Mois\", moment().add(-30, 'days').format(\"YYYY-MM-DD\"));\r",
+									"pm.collectionVariables.set(\"dateDuJour_Moins_6_Mois\", moment().add(-180, 'days').format(\"YYYY-MM-DD\"));\r",
+									"pm.collectionVariables.set(\"dateDuJourFormatRecherche\", moment().format(\"YYYY/MM/DD\"));\r",
+									"\r",
+									"console.info(pm.collectionVariables.get('folderName') + \" --> \" + this.request.name);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "AALR",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "ALR",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"type": "text",
+								"value": "text/plain"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"login\": \"{{login}}\",\n    \"password\": \"{{password}}\"\n}"
+						},
+						"url": {
+							"raw": "{{url}}/me/login",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"me",
+								"login"
+							]
+						},
+						"description": "Chargement d'une tâche"
+					},
+					"response": []
+				},
+				{
+					"name": "Mes informations",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"let jsonData = pm.response.json();\r",
+									"\r",
+									"//get ID\r",
+									"pm.collectionVariables.set(\"brokerId\", jsonData.data.brokerId);\r",
+									"pm.collectionVariables.set(\"personApporteurId\", jsonData.data.person.id);\r",
+									"pm.collectionVariables.set(\"loginApporteur\", jsonData.data.userLogin);\r",
+									"pm.collectionVariables.set(\"profil\", jsonData.data.profiles);\r",
+									"\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"console.log('Je suis ' + jsonData.data.person.familyName +' ' +jsonData.data.person.firstName);\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.info(pm.collectionVariables.get('folderName') + \" --> \" + this.request.name);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/me",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"me"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Informations système",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"let jsonData = pm.response.json();\r",
+									"\r",
+									"pm.collectionVariables.set(\"clevaVersion\", jsonData.data.applicationServer.version);\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.info(pm.collectionVariables.get('folderName') + \" --> \" + this.request.name);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/system/info",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"system",
+								"info"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"pm.collectionVariables.set('folderName','Connexion et initialisation');"
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Sinistre auto collision",
+			"item": [
+				{
+					"name": "Connexion CLEVA",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"token\", pm.response.text());",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"",
+									"",
+									"console.log(pm.response.text());"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const moment = require('moment');\r",
+									"pm.collectionVariables.set(\"dateDuJour\", moment().format(\"YYYY-MM-DD\"));\r",
+									"pm.collectionVariables.set(\"dateDuJourFormatRecherche\", moment().format(\"YYYY/MM/DD\"));\r",
+									"\r",
+									"console.info(this.request.name);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "AALR",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "ALR",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"type": "text",
+								"value": "text/plain"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"login\": \"{{login}}\",\n    \"password\": \"{{password}}\"\n}"
+						},
+						"url": {
+							"raw": "{{url}}/me/login",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"me",
+								"login"
+							]
+						},
+						"description": "Chargement d'une tâche"
+					},
+					"response": []
+				},
+				{
+					"name": "Rechercher le contrat",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"const jsonData = pm.response.json();\r",
+									"\r",
+									"//Tests de performance\r",
+									"if (pm.environment.get(\"executePerformanceTests\") == 'true'){\r",
+									"\r",
+									"    pm.test(\"Response time is less than 2000ms\", function () {\r",
+									"        pm.expect(pm.response.responseTime).to.be.below(2000);\r",
+									"    });\r",
+									"}\r",
+									"\r",
+									"/*\r",
+									"pm.test(\"Limit check\", function () {\r",
+									"    pm.expect(jsonData.limit).to.eql(pm.collectionVariables.get(\"50_Limit\"));\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Offset check\", function () {\r",
+									"    pm.expect(jsonData.offset).to.eql(pm.collectionVariables.get(\"defaultOffset\"));\r",
+									"});\r",
+									"*/\r",
+									"\r",
+									"pm.test(\"Status code name has string\", function () {\r",
+									"    pm.expect(jsonData.status).to.eql(\"SUCCESS\");\r",
+									"});\r",
+									"\r",
+									"const contrats = jsonData.data;\r",
+									"//Récupération de l'Id du contrat \r",
+									"pm.collectionVariables.set(\"autoContractId\", contrats[_.random(0, contrats.length-1)].id);\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.info(this.request.name);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/contracts?productCode={{productCode}}&offset={{defaultOffset}}&limit={{50_Limit}}&status=CONTRACT",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"contracts"
+							],
+							"query": [
+								{
+									"key": "productCode",
+									"value": "{{productCode}}"
+								},
+								{
+									"key": "offset",
+									"value": "{{defaultOffset}}"
+								},
+								{
+									"key": "limit",
+									"value": "{{50_Limit}}"
+								},
+								{
+									"key": "status",
+									"value": "CONTRACT"
+								},
+								{
+									"key": "effectiveDateMin",
+									"value": "{{2MonthsAgo}}",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/contracts?number={{devisMRHNumero}}&productCode={{produitPMID1Code}}&offset={{defaultOffset}}&limit={{defaultLimit}}",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"contracts"
+									],
+									"query": [
+										{
+											"key": "number",
+											"value": "{{devisMRHNumero}}"
+										},
+										{
+											"key": "productCode",
+											"value": "{{produitPMID1Code}}"
+										},
+										{
+											"key": "offset",
+											"value": "{{defaultOffset}}"
+										},
+										{
+											"key": "limit",
+											"value": "{{defaultLimit}}"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 29 Dec 2021 14:57:53 GMT"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=20"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Server",
+									"value": ""
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"code\": 200,\n    \"data\": [\n        {\n            \"adjustmentCoefficient\": 0,\n            \"branchCode\": \"INCENDIE\",\n            \"branchLabel\": \"Incendie et Eléments naturels\",\n            \"businessType\": \"MISC\",\n            \"cardinalityType\": \"INDIVIDUAL\",\n            \"comment\": \"If we index the protocol, we can get to the FTP transmitter through the 1080p IB pixel!\",\n            \"commercialCoefficient\": 0,\n            \"companyCode\": \"IARCI\",\n            \"companyLabel\": \"CLEVA IARD Compagnie\",\n            \"currentIndex\": 200,\n            \"customerDeposit\": \"0.0\",\n            \"customerId\": \"20000051\",\n            \"customerName\": \"BRUN LOUIS\",\n            \"debtRecoveryExclusion\": false,\n            \"freeZones\": {\n                \"PPSIARD_SOCLE_CAMPAGNE\": {},\n                \"PPSIARD_PMID1_FRAIS_POLICE\": {\n                    \"type\": \"STRING\",\n                    \"value\": \"5\"\n                },\n                \"PPSIARD_PMID1_LOI_HAMON\": {},\n                \"PPSIARD_SOCLE_CODE_PROMOTION\": {}\n            },\n            \"id\": \"20000060\",\n            \"indexCode\": \"FFB\",\n            \"indexable\": false,\n            \"insurerId\": \"1001361\",\n            \"insurerName\": \"INETUM INSURANCE\",\n            \"management\": {},\n            \"master\": false,\n            \"number\": \"PMID1-D-01016\",\n            \"origin\": 0,\n            \"payment\": {\n                \"bankDetailsUsageCode\": \"P\",\n                \"bankDetailsUsageLabel\": \"Principale\",\n                \"directDebitDay\": 5,\n                \"discountPayer\": \"CUSTOMER\",\n                \"endorsementDiscountCode\": \"VA\",\n                \"endorsementPayer\": \"CUSTOMER\",\n                \"endorsementPaymentCode\": \"PF\",\n                \"fiscalTerritory\": \"FCEMT\",\n                \"newBusinessPayer\": \"CUSTOMER\",\n                \"newBusinessPaymentCode\": \"PF\",\n                \"numberMonthsPaymentPeriod\": 12,\n                \"payablePersonCallName\": \"BRUN LOUIS\",\n                \"payerPersonId\": \"20000179\",\n                \"periodicity\": \"Annual\",\n                \"termPayer\": \"CUSTOMER\",\n                \"termPaymentCode\": \"PF\",\n                \"termPeriodicity\": \"TO_EXPIRE\"\n            },\n            \"previousIndex\": 200,\n            \"productCode\": \"PMID1\",\n            \"productLabel\": \"Souche multirisques habitation\",\n            \"provisionalPremiumCallRate\": 0,\n            \"revisable\": false,\n            \"riskType\": \"D100\",\n            \"searchDetails\": {\n                \"misc\": {\n                    \"annualPremium\": 361.71,\n                    \"formula\": \"SIMPLE\",\n                    \"formulaLabel\": \"SIMPLE\",\n                    \"fullAnnualPremium\": 427.98,\n                    \"riskDescription\": \"APPT 20 m2 69003 \"\n                }\n            },\n            \"status\": {\n                \"code\": \"QUOTE\",\n                \"creationDate\": \"2021-12-29\",\n                \"earliestDate\": \"2021-12-29\",\n                \"effectiveDate\": \"2021-12-29\",\n                \"effectiveTime\": \"2021-12-29\",\n                \"indexDate\": \"2021-12-29\",\n                \"mainDueDate\": \"1201\",\n                \"nextDueDate\": \"2022-12-01\",\n                \"nextDueDateCode\": \"2212\",\n                \"nextMainDueDate\": \"2022-12-01\",\n                \"originalContractEffectiveDate\": \"2021-12-29\",\n                \"quotationPriceValidityDate\": \"2022-01-28\",\n                \"startDate\": \"2021-12-29\",\n                \"subcode\": \"0\",\n                \"sublabel\": \"Devis\",\n                \"termBlocked\": false,\n                \"updateDate\": \"2021-12-29\"\n            }\n        }\n    ],\n    \"limit\": 10,\n    \"offset\": 0,\n    \"resultSize\": 1,\n    \"status\": \"SUCCESS\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Chargement de contrat",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.info(this.request.name);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"let jsonData = pm.response.json();\r",
+									"\r",
+									"console.log(\"URL pour consulter l'objet créé dans CLEVA Web :\")\r",
+									"console.log(pm.environment.get(\"clevaWebUrl\")+ \"iard/auto/\" +jsonData.data.id +\"/consultation\");\r",
+									"\r",
+									"pm.collectionVariables.set(\"autoRiskId\", jsonData.data.risk.id);\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/auto/contracts/:id",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"auto",
+								"contracts",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{autoContractId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Liste natures de sinistre",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"let jsonData = pm.response.json();\r",
+									"\r",
+									"let codes = jsonData.data.values;\r",
+									"\r",
+									"\r",
+									"//Set title code\r",
+									"pm.collectionVariables.set(\"collisionClaimNature\", codes[_.random(0, codes.length-1)].code);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.info(this.request.name);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/settings/lists/:helpListCode?productCode={{productCode}}&text=Accident Collision",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"settings",
+								"lists",
+								":helpListCode"
+							],
+							"query": [
+								{
+									"key": "productCode",
+									"value": "{{productCode}}"
+								},
+								{
+									"key": "text",
+									"value": "Accident Collision"
+								}
+							],
+							"variable": [
+								{
+									"key": "helpListCode",
+									"value": "CLAIM_NATURES"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Liste des sous natures de sinistre",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"let jsonData = pm.response.json();\r",
+									"\r",
+									"let codes = jsonData.data.values;\r",
+									"\r",
+									"\r",
+									"//Set title code\r",
+									"pm.collectionVariables.set(\"collisionClaimSubNature\", codes[_.random(0, codes.length-1)].code);\r",
+									"console.log(jsonData);\r",
+									"\r",
+									"pm.visualizer.set(pm.collectionVariables.get(\"templateListes\"), {\r",
+									"    response: pm.response.json()\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.info(this.request.name);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/settings/lists/:helpListCode?claimNature={{collisionClaimNature}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"settings",
+								"lists",
+								":helpListCode"
+							],
+							"query": [
+								{
+									"key": "text",
+									"value": "culture",
+									"disabled": true
+								},
+								{
+									"key": "maxResult",
+									"value": "15",
+									"disabled": true
+								},
+								{
+									"key": "claimNature",
+									"value": "{{collisionClaimNature}}"
+								}
+							],
+							"variable": [
+								{
+									"key": "helpListCode",
+									"value": "CLAIM_SUB_NATURES",
+									"description": "(Required) Code of the HelpList"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Liste des natures de sous dossier",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"let jsonData = pm.response.json();\r",
+									"\r",
+									"let codes = jsonData.data.values;\r",
+									"\r",
+									"//Set title code\r",
+									"pm.collectionVariables.set(\"collisionSubRecordNature\", codes[_.random(0, codes.length-1)].code);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.info(this.request.name);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/settings/lists/:helpListCode?text=ADMA&claimNature={{collisionClaimNature}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"settings",
+								"lists",
+								":helpListCode"
+							],
+							"query": [
+								{
+									"key": "text",
+									"value": "ADMA"
+								},
+								{
+									"key": "maxResult",
+									"value": "15",
+									"disabled": true
+								},
+								{
+									"key": "claimNature",
+									"value": "{{collisionClaimNature}}"
+								}
+							],
+							"variable": [
+								{
+									"key": "helpListCode",
+									"value": "CLAIM_SUBFOLDER_NATURES"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Liste origines de sinistre",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"let jsonData = pm.response.json();\r",
+									"\r",
+									"let codes = jsonData.data.values;\r",
+									"\r",
+									"//Set title code\r",
+									"pm.collectionVariables.set(\"claimOrigin\", codes[_.random(0, codes.length-1)].code);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.info(this.request.name);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/settings/lists/:helpListCode",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"settings",
+								"lists",
+								":helpListCode"
+							],
+							"query": [
+								{
+									"key": "text",
+									"value": "MDIM",
+									"disabled": true
+								},
+								{
+									"key": "maxResult",
+									"value": "15",
+									"disabled": true
+								},
+								{
+									"key": "claimNature",
+									"value": "{{collisionClaimNature}}",
+									"disabled": true
+								}
+							],
+							"variable": [
+								{
+									"key": "helpListCode",
+									"value": "PPSIARD_SOCLE_LST_SIN_ORIGINE"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get role intervenant assuré",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.info(pm.collectionVariables.get('folderName') + \" --> \" + this.request.name);\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"let jsonData = pm.response.json();\r",
+									"\r",
+									"let codes = jsonData.data.values;\r",
+									"\r",
+									"//Set title code\r",
+									"pm.collectionVariables.set(\"insuredRole\", codes[_.random(0, codes.length-1)].code);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/settings/lists/:helpListCode?productCode=PAID1&domain=CLAMIS&text=Ass",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"settings",
+								"lists",
+								":helpListCode"
+							],
+							"query": [
+								{
+									"key": "productCode",
+									"value": "PAID1"
+								},
+								{
+									"key": "domain",
+									"value": "CLAMIS"
+								},
+								{
+									"key": "text",
+									"value": "Ass"
+								}
+							],
+							"variable": [
+								{
+									"key": "helpListCode",
+									"value": "INTERVENER_ROLES",
+									"description": "(Required) Code of the HelpList"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get role intervenant adverse",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.info(pm.collectionVariables.get('folderName') + \" --> \" + this.request.name);\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"let jsonData = pm.response.json();\r",
+									"\r",
+									"let codes = jsonData.data.values;\r",
+									"\r",
+									"//Set title code\r",
+									"pm.collectionVariables.set(\"adverseRole\", codes[_.random(0, codes.length-1)].code);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/settings/lists/:helpListCode?productCode=PAID1&domain=CLAMIS&text=Adve",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"settings",
+								"lists",
+								":helpListCode"
+							],
+							"query": [
+								{
+									"key": "productCode",
+									"value": "PAID1"
+								},
+								{
+									"key": "domain",
+									"value": "CLAMIS"
+								},
+								{
+									"key": "text",
+									"value": "Adve"
+								}
+							],
+							"variable": [
+								{
+									"key": "helpListCode",
+									"value": "INTERVENER_ROLES",
+									"description": "(Required) Code of the HelpList"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Ouverture",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"let jsonData = pm.response.json();\r",
+									"\r",
+									"//get ID\r",
+									"pm.collectionVariables.set(\"sinistreCollisionNumero\", jsonData.data.number);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.info(this.request.name);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"comments\": \"{{$randomPhrase}}\",\r\n    \"contractId\": {{autoContractId}},\r\n    \"damages\": {\r\n        \"aggravatingCircumstance\": {{$randomBoolean}},\r\n        \"bodily\": false,\r\n        \"circumstances\": \"{{$randomPhrase}}\",\r\n        \"description\": \"{{$randomPhrase}}\",\r\n        \"gravity\": \"LIGHT\",\r\n        \"immaterial\": {{$randomBoolean}},\r\n        \"material\": {{$randomBoolean}},\r\n        \"type\": \"{{$randomWord}}\"\r\n    },\r\n    \"status\": {\r\n        \"managementDate\": \"{{currentDate}}\",\r\n        \"occurrenceDate\": \"{{currentDate}}\"\r\n    },\r\n    \"riskId\": {{autoRiskId}},\r\n    \"natureCode\": \"{{collisionClaimNature}}\",\r\n    \"origin\": \"{{claimOrigin}}\",\r\n    \"reference\": \"{{$randomInt}}\",\r\n    \"subnatureCode\": \"{{collisionClaimSubNature}}\",\r\n    \"summary\": \"{{$randomLoremParagraph}}\",\r\n    \"subfolders\": [\r\n        {\r\n            \"natureCode\": \"{{collisionSubRecordNature}}\",\r\n            \"party\": {\r\n                \"roleCode\": \"{{insuredRole}}\"\r\n            },\r\n            \"vehicleDamages\": {\r\n                \"isVehicleStopped\": true,\r\n                \"impactPoint2\": true,\r\n                \"indeterminateImpact\": true,\r\n                \"impactPoint5\": true,\r\n                \"bottomImpact\": true\r\n            }\r\n        },\r\n        {\r\n            \"natureCode\": \"{{collisionSubRecordNature}}\",\r\n            \"party\": {\r\n                \"person\": {\r\n                    \"familyName\": \"{{$randomLastName}}\",\r\n                    \"firstName\": \"{{$randomFirstName}}\"\r\n                },\r\n                \"communication\": {\r\n                    \"cellphone\": \"{{$randomPhoneNumber}}\",\r\n                    \"email\": \"{{$randomEmail}}\"\r\n                },\r\n                \"roleCode\": \"{{adverseRole}}\"\r\n            }\r\n        }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/claims",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"claims"
+							],
+							"query": [
+								{
+									"key": null,
+									"value": "",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Recherche",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"let jsonData = pm.response.json();\r",
+									"let claims = jsonData.data;\r",
+									"\r",
+									"pm.collectionVariables.set(\"sinistreCollisionId\", claims[_.random(0, claims.length-1)].id);\r",
+									"\r",
+									"console.log(jsonData);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.info(this.request.name);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"comments\": \"Sinistre ouvert par API- comments\",\r\n  \"contractId\":  {{devisMRHId}},\r\n  \"damages\": {\r\n    \"aggravatingCircumstance\": false\r\n    },\r\n  \"natureCode\": \"MRHDDE\",\r\n  \"origin\": \" API \",\r\n  \"reference\": \"API - 0001\",\r\n  \"subnatureCode\": \"DDE01\",\r\n  \"summary\": \"Sinistre ouvert par API -summary \"\r\n}\r\n   \r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/claims?number={{sinistreCollisionNumero}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"claims"
+							],
+							"query": [
+								{
+									"key": "number",
+									"value": "{{sinistreCollisionNumero}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Chargement",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"let jsonData = pm.response.json();\r",
+									"\r",
+									"console.log(jsonData);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.info(this.request.name);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"comments\": \"Sinistre ouvert par API- comments\",\r\n  \"contractId\":  {{devisMRHId}},\r\n  \"damages\": {\r\n    \"aggravatingCircumstance\": false\r\n    },\r\n  \"natureCode\": \"MRHDDE\",\r\n  \"origin\": \" API \",\r\n  \"reference\": \"API - 0001\",\r\n  \"subnatureCode\": \"DDE01\",\r\n  \"summary\": \"Sinistre ouvert par API -summary \"\r\n}\r\n   \r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/claims/:id",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"claims",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "12000"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"pm.collectionVariables.set('folderName','Sinistre MRH (Dégat des eaux)');"
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Sinistre auto collision (avec missionnement)",
+			"item": [
+				{
+					"name": "Connexion CLEVA",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"token\", pm.response.text());",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"",
+									"",
+									"console.log(pm.response.text());"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const moment = require('moment');\r",
+									"pm.collectionVariables.set(\"dateDuJour\", moment().format(\"YYYY-MM-DD\"));\r",
+									"pm.collectionVariables.set(\"dateDuJourFormatRecherche\", moment().format(\"YYYY/MM/DD\"));\r",
+									"\r",
+									"console.info(this.request.name);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "AALR",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "ALR",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"type": "text",
+								"value": "text/plain"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"login\": \"{{login}}\",\n    \"password\": \"{{password}}\"\n}"
+						},
+						"url": {
+							"raw": "{{url}}/me/login",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"me",
+								"login"
+							]
+						},
+						"description": "Chargement d'une tâche"
+					},
+					"response": []
+				},
+				{
+					"name": "Rechercher le contrat",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"const jsonData = pm.response.json();\r",
+									"\r",
+									"//Tests de performance\r",
+									"if (pm.environment.get(\"executePerformanceTests\") == 'true'){\r",
+									"\r",
+									"    pm.test(\"Response time is less than 2000ms\", function () {\r",
+									"        pm.expect(pm.response.responseTime).to.be.below(2000);\r",
+									"    });\r",
+									"}\r",
+									"\r",
+									"/*\r",
+									"pm.test(\"Limit check\", function () {\r",
+									"    pm.expect(jsonData.limit).to.eql(pm.collectionVariables.get(\"50_Limit\"));\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Offset check\", function () {\r",
+									"    pm.expect(jsonData.offset).to.eql(pm.collectionVariables.get(\"defaultOffset\"));\r",
+									"});\r",
+									"*/\r",
+									"\r",
+									"pm.test(\"Status code name has string\", function () {\r",
+									"    pm.expect(jsonData.status).to.eql(\"SUCCESS\");\r",
+									"});\r",
+									"\r",
+									"const contrats = jsonData.data;\r",
+									"//Récupération de l'Id du contrat \r",
+									"pm.collectionVariables.set(\"autoContractId\", contrats[_.random(0, contrats.length-1)].id);\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.info(this.request.name);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/contracts?productCode={{productCode}}&offset={{defaultOffset}}&limit={{50_Limit}}&status=CONTRACT",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"contracts"
+							],
+							"query": [
+								{
+									"key": "productCode",
+									"value": "{{productCode}}"
+								},
+								{
+									"key": "offset",
+									"value": "{{defaultOffset}}"
+								},
+								{
+									"key": "limit",
+									"value": "{{50_Limit}}"
+								},
+								{
+									"key": "status",
+									"value": "CONTRACT"
+								},
+								{
+									"key": "effectiveDateMin",
+									"value": "{{2MonthsAgo}}",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/contracts?number={{devisMRHNumero}}&productCode={{produitPMID1Code}}&offset={{defaultOffset}}&limit={{defaultLimit}}",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"contracts"
+									],
+									"query": [
+										{
+											"key": "number",
+											"value": "{{devisMRHNumero}}"
+										},
+										{
+											"key": "productCode",
+											"value": "{{produitPMID1Code}}"
+										},
+										{
+											"key": "offset",
+											"value": "{{defaultOffset}}"
+										},
+										{
+											"key": "limit",
+											"value": "{{defaultLimit}}"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 29 Dec 2021 14:57:53 GMT"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=20"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Server",
+									"value": ""
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"code\": 200,\n    \"data\": [\n        {\n            \"adjustmentCoefficient\": 0,\n            \"branchCode\": \"INCENDIE\",\n            \"branchLabel\": \"Incendie et Eléments naturels\",\n            \"businessType\": \"MISC\",\n            \"cardinalityType\": \"INDIVIDUAL\",\n            \"comment\": \"If we index the protocol, we can get to the FTP transmitter through the 1080p IB pixel!\",\n            \"commercialCoefficient\": 0,\n            \"companyCode\": \"IARCI\",\n            \"companyLabel\": \"CLEVA IARD Compagnie\",\n            \"currentIndex\": 200,\n            \"customerDeposit\": \"0.0\",\n            \"customerId\": \"20000051\",\n            \"customerName\": \"BRUN LOUIS\",\n            \"debtRecoveryExclusion\": false,\n            \"freeZones\": {\n                \"PPSIARD_SOCLE_CAMPAGNE\": {},\n                \"PPSIARD_PMID1_FRAIS_POLICE\": {\n                    \"type\": \"STRING\",\n                    \"value\": \"5\"\n                },\n                \"PPSIARD_PMID1_LOI_HAMON\": {},\n                \"PPSIARD_SOCLE_CODE_PROMOTION\": {}\n            },\n            \"id\": \"20000060\",\n            \"indexCode\": \"FFB\",\n            \"indexable\": false,\n            \"insurerId\": \"1001361\",\n            \"insurerName\": \"INETUM INSURANCE\",\n            \"management\": {},\n            \"master\": false,\n            \"number\": \"PMID1-D-01016\",\n            \"origin\": 0,\n            \"payment\": {\n                \"bankDetailsUsageCode\": \"P\",\n                \"bankDetailsUsageLabel\": \"Principale\",\n                \"directDebitDay\": 5,\n                \"discountPayer\": \"CUSTOMER\",\n                \"endorsementDiscountCode\": \"VA\",\n                \"endorsementPayer\": \"CUSTOMER\",\n                \"endorsementPaymentCode\": \"PF\",\n                \"fiscalTerritory\": \"FCEMT\",\n                \"newBusinessPayer\": \"CUSTOMER\",\n                \"newBusinessPaymentCode\": \"PF\",\n                \"numberMonthsPaymentPeriod\": 12,\n                \"payablePersonCallName\": \"BRUN LOUIS\",\n                \"payerPersonId\": \"20000179\",\n                \"periodicity\": \"Annual\",\n                \"termPayer\": \"CUSTOMER\",\n                \"termPaymentCode\": \"PF\",\n                \"termPeriodicity\": \"TO_EXPIRE\"\n            },\n            \"previousIndex\": 200,\n            \"productCode\": \"PMID1\",\n            \"productLabel\": \"Souche multirisques habitation\",\n            \"provisionalPremiumCallRate\": 0,\n            \"revisable\": false,\n            \"riskType\": \"D100\",\n            \"searchDetails\": {\n                \"misc\": {\n                    \"annualPremium\": 361.71,\n                    \"formula\": \"SIMPLE\",\n                    \"formulaLabel\": \"SIMPLE\",\n                    \"fullAnnualPremium\": 427.98,\n                    \"riskDescription\": \"APPT 20 m2 69003 \"\n                }\n            },\n            \"status\": {\n                \"code\": \"QUOTE\",\n                \"creationDate\": \"2021-12-29\",\n                \"earliestDate\": \"2021-12-29\",\n                \"effectiveDate\": \"2021-12-29\",\n                \"effectiveTime\": \"2021-12-29\",\n                \"indexDate\": \"2021-12-29\",\n                \"mainDueDate\": \"1201\",\n                \"nextDueDate\": \"2022-12-01\",\n                \"nextDueDateCode\": \"2212\",\n                \"nextMainDueDate\": \"2022-12-01\",\n                \"originalContractEffectiveDate\": \"2021-12-29\",\n                \"quotationPriceValidityDate\": \"2022-01-28\",\n                \"startDate\": \"2021-12-29\",\n                \"subcode\": \"0\",\n                \"sublabel\": \"Devis\",\n                \"termBlocked\": false,\n                \"updateDate\": \"2021-12-29\"\n            }\n        }\n    ],\n    \"limit\": 10,\n    \"offset\": 0,\n    \"resultSize\": 1,\n    \"status\": \"SUCCESS\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Chargement de contrat",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.info(this.request.name);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"let jsonData = pm.response.json();\r",
+									"\r",
+									"console.log(\"URL pour consulter l'objet créé dans CLEVA Web :\")\r",
+									"console.log(pm.environment.get(\"clevaWebUrl\")+ \"iard/auto/\" +jsonData.data.id +\"/consultation\");\r",
+									"\r",
+									"pm.collectionVariables.set(\"autoRiskId\", jsonData.data.risk.id);\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/auto/contracts/:id",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"auto",
+								"contracts",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{autoContractId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Liste natures de sinistre",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"let jsonData = pm.response.json();\r",
+									"\r",
+									"let codes = jsonData.data.values;\r",
+									"\r",
+									"\r",
+									"//Set title code\r",
+									"pm.collectionVariables.set(\"collisionClaimNature\", codes[_.random(0, codes.length-1)].code);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.info(this.request.name);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/settings/lists/:helpListCode?productCode={{productCode}}&text=Accident Collision",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"settings",
+								"lists",
+								":helpListCode"
+							],
+							"query": [
+								{
+									"key": "productCode",
+									"value": "{{productCode}}"
+								},
+								{
+									"key": "text",
+									"value": "Accident Collision"
+								}
+							],
+							"variable": [
+								{
+									"key": "helpListCode",
+									"value": "CLAIM_NATURES"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Liste des sous natures de sinistre",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"let jsonData = pm.response.json();\r",
+									"\r",
+									"let codes = jsonData.data.values;\r",
+									"\r",
+									"\r",
+									"//Set title code\r",
+									"pm.collectionVariables.set(\"collisionClaimSubNature\", codes[_.random(0, codes.length-1)].code);\r",
+									"console.log(jsonData);\r",
+									"\r",
+									"pm.visualizer.set(pm.collectionVariables.get(\"templateListes\"), {\r",
+									"    response: pm.response.json()\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.info(this.request.name);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/settings/lists/:helpListCode?claimNature={{collisionClaimNature}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"settings",
+								"lists",
+								":helpListCode"
+							],
+							"query": [
+								{
+									"key": "text",
+									"value": "culture",
+									"disabled": true
+								},
+								{
+									"key": "maxResult",
+									"value": "15",
+									"disabled": true
+								},
+								{
+									"key": "claimNature",
+									"value": "{{collisionClaimNature}}"
+								}
+							],
+							"variable": [
+								{
+									"key": "helpListCode",
+									"value": "CLAIM_SUB_NATURES",
+									"description": "(Required) Code of the HelpList"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Liste des natures de sous dossier",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"let jsonData = pm.response.json();\r",
+									"\r",
+									"let codes = jsonData.data.values;\r",
+									"\r",
+									"//Set title code\r",
+									"pm.collectionVariables.set(\"collisionSubRecordNature\", codes[_.random(0, codes.length-1)].code);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.info(this.request.name);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/settings/lists/:helpListCode?text=ADMA&claimNature={{collisionClaimNature}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"settings",
+								"lists",
+								":helpListCode"
+							],
+							"query": [
+								{
+									"key": "text",
+									"value": "ADMA"
+								},
+								{
+									"key": "maxResult",
+									"value": "15",
+									"disabled": true
+								},
+								{
+									"key": "claimNature",
+									"value": "{{collisionClaimNature}}"
+								}
+							],
+							"variable": [
+								{
+									"key": "helpListCode",
+									"value": "CLAIM_SUBFOLDER_NATURES"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Liste origines de sinistre",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"let jsonData = pm.response.json();\r",
+									"\r",
+									"let codes = jsonData.data.values;\r",
+									"\r",
+									"//Set title code\r",
+									"pm.collectionVariables.set(\"claimOrigin\", codes[_.random(0, codes.length-1)].code);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.info(this.request.name);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/settings/lists/:helpListCode",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"settings",
+								"lists",
+								":helpListCode"
+							],
+							"query": [
+								{
+									"key": "text",
+									"value": "MDIM",
+									"disabled": true
+								},
+								{
+									"key": "maxResult",
+									"value": "15",
+									"disabled": true
+								},
+								{
+									"key": "claimNature",
+									"value": "{{collisionClaimNature}}",
+									"disabled": true
+								}
+							],
+							"variable": [
+								{
+									"key": "helpListCode",
+									"value": "PPSIARD_SOCLE_LST_SIN_ORIGINE"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get role intervenant assuré",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.info(pm.collectionVariables.get('folderName') + \" --> \" + this.request.name);\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"let jsonData = pm.response.json();\r",
+									"\r",
+									"let codes = jsonData.data.values;\r",
+									"\r",
+									"//Set title code\r",
+									"pm.collectionVariables.set(\"insuredRole\", codes[_.random(0, codes.length-1)].code);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/settings/lists/:helpListCode?productCode=PAID1&domain=CLAMIS&text=Ass",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"settings",
+								"lists",
+								":helpListCode"
+							],
+							"query": [
+								{
+									"key": "productCode",
+									"value": "PAID1"
+								},
+								{
+									"key": "domain",
+									"value": "CLAMIS"
+								},
+								{
+									"key": "text",
+									"value": "Ass"
+								}
+							],
+							"variable": [
+								{
+									"key": "helpListCode",
+									"value": "INTERVENER_ROLES",
+									"description": "(Required) Code of the HelpList"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get role intervenant adverse",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.info(pm.collectionVariables.get('folderName') + \" --> \" + this.request.name);\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"let jsonData = pm.response.json();\r",
+									"\r",
+									"let codes = jsonData.data.values;\r",
+									"\r",
+									"//Set title code\r",
+									"pm.collectionVariables.set(\"adverseRole\", codes[_.random(0, codes.length-1)].code);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/settings/lists/:helpListCode?productCode=PAID1&domain=CLAMIS&text=Adve",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"settings",
+								"lists",
+								":helpListCode"
+							],
+							"query": [
+								{
+									"key": "productCode",
+									"value": "PAID1"
+								},
+								{
+									"key": "domain",
+									"value": "CLAMIS"
+								},
+								{
+									"key": "text",
+									"value": "Adve"
+								}
+							],
+							"variable": [
+								{
+									"key": "helpListCode",
+									"value": "INTERVENER_ROLES",
+									"description": "(Required) Code of the HelpList"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Liste des natures de missions",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.info(pm.collectionVariables.get('folderName') + \" --> \" + this.request.name);\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"let jsonData = pm.response.json();\r",
+									"\r",
+									"let codes = jsonData.data.values;\r",
+									"\r",
+									"//Set title code\r",
+									"pm.collectionVariables.set(\"missionOrderNature\", codes[_.random(0, codes.length-1)].code);\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/settings/lists/:helpListCode?category=AUTO&text=Expertise dommages",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"settings",
+								"lists",
+								":helpListCode"
+							],
+							"query": [
+								{
+									"key": "category",
+									"value": "AUTO"
+								},
+								{
+									"key": "text",
+									"value": "Expertise dommages"
+								}
+							],
+							"variable": [
+								{
+									"key": "helpListCode",
+									"value": "MISSION_ORDERS_NATURES",
+									"description": "(Required) Code of the HelpList"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Type prestataire",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"let jsonData = pm.response.json();\r",
+									"\r",
+									"let codes = jsonData.data.values;\r",
+									"\r",
+									"\r",
+									"pm.collectionVariables.set(\"providerTypeCode\", codes[_.random(0, codes.length-1)].code);\r",
+									"pm.collectionVariables.set(\"providerTypeLabel\", codes[_.random(0, codes.length-1)].label);\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/settings/lists/:helpListCode?text=Expert au",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"settings",
+								"lists",
+								":helpListCode"
+							],
+							"query": [
+								{
+									"key": "text",
+									"value": "Expert au"
+								}
+							],
+							"variable": [
+								{
+									"key": "helpListCode",
+									"value": "SERVICE_PROVIDER_TYPES"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Ouverture",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"let jsonData = pm.response.json();\r",
+									"\r",
+									"//get ID\r",
+									"pm.collectionVariables.set(\"sinistreCollisionNumero\", jsonData.data.number);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.info(this.request.name);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"comments\": \"{{$randomPhrase}}\",\r\n    \"contractId\": {{autoContractId}},\r\n    \"damages\": {\r\n        \"aggravatingCircumstance\": {{$randomBoolean}},\r\n        \"bodily\": false,\r\n        \"circumstances\": \"{{$randomPhrase}}\",\r\n        \"description\": \"{{$randomPhrase}}\",\r\n        \"gravity\": \"LIGHT\",\r\n        \"immaterial\": {{$randomBoolean}},\r\n        \"material\": {{$randomBoolean}},\r\n        \"type\": \"{{$randomWord}}\"\r\n    },\r\n    \"status\": {\r\n        \"managementDate\": \"{{currentDate}}\",\r\n        \"occurrenceDate\": \"{{currentDate}}\"\r\n    },\r\n    \"riskId\": {{autoRiskId}},\r\n    \"natureCode\": \"{{collisionClaimNature}}\",\r\n    \"origin\": \"{{claimOrigin}}\",\r\n    \"reference\": \"{{$randomInt}}\",\r\n    \"subnatureCode\": \"{{collisionClaimSubNature}}\",\r\n    \"summary\": \"{{$randomLoremParagraph}}\",\r\n    \"subfolders\": [\r\n        {\r\n            \"natureCode\": \"{{collisionSubRecordNature}}\",\r\n            \"party\": {\r\n                \"roleCode\": \"{{insuredRole}}\"\r\n            }\r\n        },\r\n        {\r\n            \"natureCode\": \"{{collisionSubRecordNature}}\",\r\n            \"party\": {\r\n                \"person\": {\r\n                    \"familyName\": \"{{$randomLastName}}\",\r\n                    \"firstName\": \"{{$randomFirstName}}\"\r\n                },\r\n                \"communication\": {\r\n                    \"cellphone\": \"{{$randomPhoneNumber}}\",\r\n                    \"email\": \"{{$randomEmail}}\"\r\n                },\r\n                \"roleCode\": \"{{adverseRole}}\"\r\n            }\r\n        }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/claims",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"claims"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Recherche",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"let jsonData = pm.response.json();\r",
+									"let claims = jsonData.data;\r",
+									"\r",
+									"pm.collectionVariables.set(\"sinistreCollisionId\", claims[_.random(0, claims.length-1)].id);\r",
+									"\r",
+									"console.log(jsonData);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.info(this.request.name);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"comments\": \"Sinistre ouvert par API- comments\",\r\n  \"contractId\":  {{devisMRHId}},\r\n  \"damages\": {\r\n    \"aggravatingCircumstance\": false\r\n    },\r\n  \"natureCode\": \"MRHDDE\",\r\n  \"origin\": \" API \",\r\n  \"reference\": \"API - 0001\",\r\n  \"subnatureCode\": \"DDE01\",\r\n  \"summary\": \"Sinistre ouvert par API -summary \"\r\n}\r\n   \r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/claims?number={{sinistreCollisionNumero}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"claims"
+							],
+							"query": [
+								{
+									"key": "number",
+									"value": "{{sinistreCollisionNumero}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Chargement",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"let jsonData = pm.response.json();\r",
+									"\r",
+									"let subFolders = jsonData.data.subfolders;\r",
+									"\r",
+									"function isSubFolderInsured(subFolder) {\r",
+									"  return subFolder.party.roleCode == 'ASSUR';\r",
+									"}\r",
+									"\r",
+									"\r",
+									"let subFolderInsured = subFolders.find(isSubFolderInsured);\r",
+									"\r",
+									"pm.collectionVariables.set(\"subFolderInsuredId\", subFolderInsured.id);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.info(this.request.name);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"comments\": \"Sinistre ouvert par API- comments\",\r\n  \"contractId\":  {{devisMRHId}},\r\n  \"damages\": {\r\n    \"aggravatingCircumstance\": false\r\n    },\r\n  \"natureCode\": \"MRHDDE\",\r\n  \"origin\": \" API \",\r\n  \"reference\": \"API - 0001\",\r\n  \"subnatureCode\": \"DDE01\",\r\n  \"summary\": \"Sinistre ouvert par API -summary \"\r\n}\r\n   \r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/claims/:id",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"claims",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{sinistreCollisionId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Recherche expert",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.info(this.request.name);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"let jsonData = pm.response.json();\r",
+									"\r",
+									"let providers = jsonData.data;\r",
+									"\r",
+									"//Set title code\r",
+									"pm.collectionVariables.set(\"serviceProviderId\", providers[_.random(0, providers.length-1)].id);\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/providers?limit=50&type={{providerTypeCode}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"providers"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "50"
+								},
+								{
+									"key": "type",
+									"value": "{{providerTypeCode}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Créer une mission",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"let jsonData = pm.response.json();\r",
+									"\r",
+									"//get ID\r",
+									"pm.collectionVariables.set(\"DDEClaimsNumber\", jsonData.data.number);\r",
+									"pm.collectionVariables.set(\"DDEClaimsId\", jsonData.data.id);\r",
+									"\r",
+									"console.log(jsonData);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.info(this.request.name);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"externalReference\": \"{{$randomInt}}\",\r\n    \"natureCode\": \"{{missionOrderNature}}\",\r\n    \"serviceProviderId\": \"{{serviceProviderId}}\",\r\n    \"subfolderId\": \"{{subFolderInsuredId}}\",\r\n    \"expertiseAddress\": {}\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/missionOrders",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"missionOrders"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"pm.collectionVariables.set('folderName','Sinistre MRH (Dégat des eaux)');"
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"const moment = require('moment');",
+					"pm.collectionVariables.set(\"currentDate\", moment().format(\"YYYY-MM-DD\"));",
+					"pm.collectionVariables.set(\"1MonthLater\", moment().add(30, 'days').format(\"YYYY-MM-DD\"));",
+					"pm.collectionVariables.set(\"6MonthsLater\", moment().add(180, 'days').format(\"YYYY-MM-DD\"));",
+					"pm.collectionVariables.set(\"1MonthAgo\", moment().add(-1, 'months').format(\"YYYY-MM-DD\"));",
+					"pm.collectionVariables.set(\"2MonthsAgo\", moment().add(-4, 'months').format(\"YYYY-MM-DD\"));",
+					"pm.collectionVariables.set(\"4MonthsAgo\", moment().add(-4, 'months').format(\"YYYY-MM-DD\"));",
+					"pm.collectionVariables.set(\"5MonthsAgo\", moment().add(-5, 'months').format(\"YYYY-MM-DD\"));",
+					"pm.collectionVariables.set(\"6MonthsAgo\", moment().add(-6, 'months').format(\"YYYY-MM-DD\"));",
+					"pm.collectionVariables.set(\"lastYear\", moment().add(-1, 'years').format(\"YYYY-MM-DD\"));",
+					"pm.collectionVariables.set(\"5YearsAgo\", moment().add(-5, 'years').format(\"YYYY-MM-DD\"));",
+					"pm.collectionVariables.set(\"10YearsAgo\", moment().add(-10, 'years').format(\"YYYY-MM-DD\"));",
+					"pm.collectionVariables.set(\"15YearsAgo\", moment().add(-15, 'years').format(\"YYYY-MM-DD\"));",
+					"pm.collectionVariables.set(\"20YearsAgo\", moment().add(-20, 'years').format(\"YYYY-MM-DD\"));",
+					"pm.collectionVariables.set(\"30YearsAgo\", moment().add(-30, 'years').format(\"YYYY-MM-DD\"));",
+					"pm.collectionVariables.set(\"35YearsAgo\", moment().add(-35, 'years').format(\"YYYY-MM-DD\"));",
+					"pm.collectionVariables.set(\"40YearsAgo\", moment().add(-40, 'years').format(\"YYYY-MM-DD\"));",
+					"pm.collectionVariables.set(\"45YearsAgo\", moment().add(-45, 'years').format(\"YYYY-MM-DD\"));",
+					"pm.collectionVariables.set(\"50YearsAgo\", moment().add(-50, 'years').format(\"YYYY-MM-DD\"));",
+					"pm.collectionVariables.set(\"60YearsAgo\", moment().add(-60, 'years').format(\"YYYY-MM-DD\"));",
+					"pm.collectionVariables.set(\"70YearsAgo\", moment().add(-70, 'years').format(\"YYYY-MM-DD\"));",
+					"pm.collectionVariables.set(\"currentDateSearchFormat\", moment().format(\"YYYY/MM/DD\"));",
+					"",
+					"//Date de naissances",
+					"pm.collectionVariables.set(\"birthDate10YearsAgo\", moment().add(-10, 'years').format(\"YYYY-MM-DD\"));",
+					"pm.collectionVariables.set(\"birthDate20YearsAgo\", moment().add(-20, 'years').format(\"YYYY-MM-DD\"));",
+					"pm.collectionVariables.set(\"birthDate30YearsAgo\", moment().add(-30, 'years').format(\"YYYY-MM-DD\"));",
+					"pm.collectionVariables.set(\"birthDate40YearsAgo\", moment().add(-40, 'years').format(\"YYYY-MM-DD\"));",
+					"pm.collectionVariables.set(\"birthDate50YearsAgo\", moment().add(-50, 'years').format(\"YYYY-MM-DD\"));",
+					"pm.collectionVariables.set(\"birthDate60YearsAgo\", moment().add(-60, 'years').format(\"YYYY-MM-DD\"));",
+					"pm.collectionVariables.set(\"birthDate70YearsAgo\", moment().add(-70, 'years').format(\"YYYY-MM-DD\"));",
+					"pm.collectionVariables.set(\"birthDate80YearsAgo\", moment().add(-80, 'years').format(\"YYYY-MM-DD\"));",
+					"",
+					"//Default variables for GET Methods",
+					"pm.collectionVariables.set(\"defaultOffset\", 0);",
+					"pm.collectionVariables.set(\"defaultLimit\", 10);",
+					"pm.collectionVariables.set(\"50_Limit\", 50);",
+					"",
+					"",
+					"//Variables de tests",
+					"pm.collectionVariables.set(\"productCode\", \"PAID1\");",
+					"",
+					"var useId = false;",
+					"if (request.url.includes('/:id')){",
+					"    useId == true;",
+					"}"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"if (request.name != 'Connexion CLEVA' && request.name != 'Connexion Cleva'){",
+					"",
+					"    if (request.method == 'GET'){",
+					"        pm.test(\"Status code is 200\", function () {",
+					"            pm.response.to.have.status(200);",
+					"        });",
+					"        if (!request.url.includes('/settings/lists')&&!request.url.includes('/me')&&!request.url.includes('/system')&&pm.collectionVariables.get(\"useId\")==false){",
+					"            pm.test(\"Limit is a number\", function () {",
+					"                pm.expect(pm.response.json().limit).to.be.an(\"number\");",
+					"            });",
+					"            pm.test(\"resultSize is a number\", function () {",
+					"                pm.expect(pm.response.json().resultSize).to.be.an(\"number\");",
+					"            });",
+					"            pm.test(\"offset is a number\", function () {",
+					"                pm.expect(pm.response.json().offset).to.be.an(\"number\");",
+					"            });  ",
+					"        }",
+					"    }",
+					"",
+					"    if (request.method == 'POST'){",
+					"",
+					"        pm.test(\"Successful POST request\", function () {",
+					"            pm.expect(pm.response.code).to.be.oneOf([200, 201, 202]);",
+					"        });",
+					"    }",
+					"",
+					"    if (request.method == 'PUT'){",
+					"        pm.test(\"Successful POST request\", function () {",
+					"            pm.expect(pm.response.code).to.be.oneOf([200, 201, 202]);",
+					"        });",
+					"    }",
+					"",
+					"    if (request.method == 'PATCH'){",
+					"",
+					"        pm.test(\"Status code is 200\", function () {",
+					"            pm.response.to.have.status(200);",
+					"        });",
+					"    }",
+					"",
+					"    if (pm.response.code == 200||pm.response.code == 201||pm.response.code == 202){",
+					"        //Content type is json",
+					"        pm.test(\"Content-Type header is application/json\", () => {",
+					"        pm.expect(pm.response.headers.get('Content-Type')).to.eql('application/json');",
+					"        });",
+					"",
+					"        //getJson data",
+					"        const jsonData = pm.response.json();",
+					"",
+					"        //Body of response is present by testing length of response",
+					"        pm.test(\"Body is present\", () => {",
+					"            jsonData.length > 1;",
+					"        });",
+					"",
+					"        //Testing if jsonData is an object",
+					"        pm.test(\"JsonData content\", () => {",
+					"            pm.expect(jsonData).to.be.an(\"object\");",
+					"        });",
+					"    }",
+					"",
+					"}",
+					"",
+					"//Styles pour les listes",
+					"if (request.url.includes('/settings/lists')){",
+					"    pm.test(\"Code is a string\", function () {",
+					"        pm.expect(pm.response.json().data.code).to.be.a(\"string\");",
+					"    });",
+					"    pm.test(\"description is a string\", function () {",
+					"        pm.expect(pm.response.json().data.description).to.be.a(\"string\");",
+					"    });",
+					"    pm.test(\"moreResults is a boolean\", function () {",
+					"        pm.expect(pm.response.json().data.moreResults).to.be.a(\"boolean\");",
+					"    });",
+					"    pm.test(\"title is a string\", function () {",
+					"        pm.expect(pm.response.json().data.title).to.be.a(\"string\");",
+					"    });",
+					"    pm.test(\"type is a string\", function () {",
+					"        pm.expect(pm.response.json().data.type).to.be.a(\"string\");",
+					"    }); ",
+					"    pm.visualizer.set(pm.collectionVariables.get(\"templateListes\"), {",
+					"      response: pm.response.json()",
+					"    });",
+					"}",
+					"",
+					"//Tests de performance",
+					"if (pm.environment.get(\"executePerformanceTests\") == 'true'){",
+					"  if (request.method == 'GET'){",
+					"    //Les listes doivent s'exécuter en moins de 500 ms",
+					"    if (request.url.includes('/settings/lists')){",
+					"        pm.test(\"Response time is less than 500ms\", function () {",
+					"        pm.expect(pm.response.responseTime).to.be.below(500);",
+					"       });",
+					"    }else{",
+					"        //Les recherches doivent s'exécuter en mois de une seconde et demi",
+					"        pm.test(\"Response time is less than 1500ms\", function () {",
+					"        pm.expect(pm.response.responseTime).to.be.below(1500);",
+					"       });",
+					"    }  ",
+					"  }",
+					"  if (request.method == 'POST'){",
+					"       //Les POST doivent s'exécuter en moins de 2 secondes",
+					"      pm.test(\"Response time is less than 2000ms\", function () {",
+					"          pm.expect(pm.response.responseTime).to.be.below(2000);",
+					"      });",
+					"  }",
+					"",
+					"  if (request.method == 'PATCH'){",
+					"      //Les PATCH doivent s'exécuter en moins de 2 secondes",
+					"      pm.test(\"Response time is less than 2000ms\", function () {",
+					"          pm.expect(pm.response.responseTime).to.be.below(2000);",
+					"      });",
+					"  }",
+					"",
+					"  if (request.method == 'PUT'){",
+					"      //Les PUT doivent s'exécuter en moins de 2 secondes",
+					"      pm.test(\"Response time is less than 2000ms\", function () {",
+					"          pm.expect(pm.response.responseTime).to.be.below(2000);",
+					"      });",
+					"  }",
+					"}"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "templateListes",
+			"value": " <style type=\"text/css\">\n        .tftable {font-size:14px;color:#333333;width:100%;border-width: 1px;border-color: #87ceeb;border-collapse: collapse;}\n        .tftable th {font-size:18px;background-color:#87ceeb;border-width: 1px;padding: 8px;border-style: solid;border-color: #87ceeb;text-align:left;}\n        .tftable tr {background-color:#ffffff;}\n        .tftable td {font-size:14px;border-width: 1px;padding: 8px;border-style: solid;border-color: #87ceeb;}\n        .tftable tr:hover {background-color:#e0ffff;}\n    </style>\n    \n    <table class=\"tftable\" border=\"1\">\n        <tr>\n            <th>Code</th>\n            <th>Label</th>\n        </tr>\n        \n        {{#each response.data.values}}\n            <tr id=row_{{@key}} onClick=\"handleClick(this.code)\">\n                <td id={{@key}}>{{code}}</td>\n                <td>{{label}}</td>\n            </tr>\n        {{/each}}\n    </table>"
+		},
+		{
+			"key": "folderName",
+			"value": ""
+		},
+		{
+			"key": "dateDuJour",
+			"value": ""
+		},
+		{
+			"key": "dateDuJourFormatRecherche",
+			"value": ""
+		},
+		{
+			"key": "token",
+			"value": ""
+		},
+		{
+			"key": "Nature_Sinistre_Collision",
+			"value": ""
+		},
+		{
+			"key": "Sous_Nature_Sinistre_Collision",
+			"value": ""
+		},
+		{
+			"key": "Nature_Sous_Dossier_Collision",
+			"value": ""
+		},
+		{
+			"key": "origineSinistre",
+			"value": ""
+		},
+		{
+			"key": "PGID1_Assurer_Conjoint",
+			"value": ""
+		},
+		{
+			"key": "contratMRHId",
+			"value": ""
+		},
+		{
+			"key": "dateDuJour_Plus_1_Mois",
+			"value": ""
+		},
+		{
+			"key": "dateDuJour_Plus_6_Mois",
+			"value": ""
+		},
+		{
+			"key": "dateDuJour_Moins_1_Mois",
+			"value": ""
+		},
+		{
+			"key": "dateDuJour_Moins_6_Mois",
+			"value": ""
+		},
+		{
+			"key": "brokerId",
+			"value": ""
+		},
+		{
+			"key": "personApporteurId",
+			"value": ""
+		},
+		{
+			"key": "loginApporteur",
+			"value": ""
+		},
+		{
+			"key": "profil",
+			"value": ""
+		},
+		{
+			"key": "clevaVersion",
+			"value": ""
+		},
+		{
+			"key": "currentDate",
+			"value": ""
+		},
+		{
+			"key": "1MonthLater",
+			"value": ""
+		},
+		{
+			"key": "6MonthsLater",
+			"value": ""
+		},
+		{
+			"key": "1MonthAgo",
+			"value": ""
+		},
+		{
+			"key": "4MonthsAgo",
+			"value": ""
+		},
+		{
+			"key": "5MonthsAgo",
+			"value": ""
+		},
+		{
+			"key": "6MonthsAgo",
+			"value": ""
+		},
+		{
+			"key": "lastYear",
+			"value": ""
+		},
+		{
+			"key": "5YearsAgo",
+			"value": ""
+		},
+		{
+			"key": "10YearsAgo",
+			"value": ""
+		},
+		{
+			"key": "15YearsAgo",
+			"value": ""
+		},
+		{
+			"key": "20YearsAgo",
+			"value": ""
+		},
+		{
+			"key": "30YearsAgo",
+			"value": ""
+		},
+		{
+			"key": "35YearsAgo",
+			"value": ""
+		},
+		{
+			"key": "40YearsAgo",
+			"value": ""
+		},
+		{
+			"key": "45YearsAgo",
+			"value": ""
+		},
+		{
+			"key": "50YearsAgo",
+			"value": ""
+		},
+		{
+			"key": "60YearsAgo",
+			"value": ""
+		},
+		{
+			"key": "70YearsAgo",
+			"value": ""
+		},
+		{
+			"key": "currentDateSearchFormat",
+			"value": ""
+		},
+		{
+			"key": "birthDate10YearsAgo",
+			"value": ""
+		},
+		{
+			"key": "birthDate20YearsAgo",
+			"value": ""
+		},
+		{
+			"key": "birthDate30YearsAgo",
+			"value": ""
+		},
+		{
+			"key": "birthDate40YearsAgo",
+			"value": ""
+		},
+		{
+			"key": "birthDate50YearsAgo",
+			"value": ""
+		},
+		{
+			"key": "birthDate60YearsAgo",
+			"value": ""
+		},
+		{
+			"key": "birthDate70YearsAgo",
+			"value": ""
+		},
+		{
+			"key": "birthDate80YearsAgo",
+			"value": ""
+		},
+		{
+			"key": "defaultOffset",
+			"value": ""
+		},
+		{
+			"key": "defaultLimit",
+			"value": ""
+		},
+		{
+			"key": "50_Limit",
+			"value": ""
+		},
+		{
+			"key": "autoContractId",
+			"value": ""
+		},
+		{
+			"key": "autoRiskId",
+			"value": ""
+		},
+		{
+			"key": "collisionClaimNature",
+			"value": ""
+		},
+		{
+			"key": "collisionClaimSubNature",
+			"value": ""
+		},
+		{
+			"key": "collisionSubRecordNature",
+			"value": ""
+		},
+		{
+			"key": "claimOrigin",
+			"value": ""
+		},
+		{
+			"key": "insuredPGID1Spouse",
+			"value": ""
+		},
+		{
+			"key": "sinistreCollisionNumero",
+			"value": ""
+		},
+		{
+			"key": "2MonthsAgo",
+			"value": ""
+		},
+		{
+			"key": "sinistreCollisionId",
+			"value": ""
+		},
+		{
+			"key": "insuredRole",
+			"value": ""
+		},
+		{
+			"key": "adverseRole",
+			"value": ""
+		},
+		{
+			"key": "productCode",
+			"value": ""
+		},
+		{
+			"key": "missionOrderNature",
+			"value": ""
+		},
+		{
+			"key": "providerTypeCode",
+			"value": ""
+		},
+		{
+			"key": "providerTypeLabel",
+			"value": ""
+		},
+		{
+			"key": "serviceProviderId",
+			"value": ""
+		},
+		{
+			"key": "subFolderInsuredId",
+			"value": ""
+		},
+		{
+			"key": "DDEClaimsNumber",
+			"value": ""
+		},
+		{
+			"key": "DDEClaimsId",
+			"value": ""
+		}
+	]
+}

@@ -1,0 +1,4867 @@
+{
+	"info": {
+		"_postman_id": "3f9ae560-ea38-450a-94da-b557ebeb6790",
+		"name": "IARD_Sinistres_PGID1_Tests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "21440125"
+	},
+	"item": [
+		{
+			"name": "Connexion et initialisation",
+			"item": [
+				{
+					"name": "Connexion CLEVA",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"token\", pm.response.text());",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"console.log(pm.response.text());"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.info(pm.collectionVariables.get('folderName') + \" --> \" + this.request.name);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "AALR",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "ALR",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"type": "text",
+								"value": "text/plain"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"login\": \"{{login}}\",\n    \"password\": \"{{password}}\"\n}"
+						},
+						"url": {
+							"raw": "{{url}}/me/login",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"me",
+								"login"
+							]
+						},
+						"description": "Chargement d'une tâche"
+					},
+					"response": []
+				},
+				{
+					"name": "Mes informations",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"let jsonData = pm.response.json();\r",
+									"\r",
+									"//get ID\r",
+									"pm.collectionVariables.set(\"brokerId\", jsonData.data.brokerId);\r",
+									"pm.collectionVariables.set(\"personApporteurId\", jsonData.data.person.id);\r",
+									"pm.collectionVariables.set(\"loginApporteur\", jsonData.data.userLogin);\r",
+									"pm.collectionVariables.set(\"profil\", jsonData.data.profiles);\r",
+									"\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"console.log('Je suis ' + jsonData.data.person.familyName +' ' +jsonData.data.person.firstName);\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.info(pm.collectionVariables.get('folderName') + \" --> \" + this.request.name);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/me",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"me"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Informations système",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"let jsonData = pm.response.json();\r",
+									"\r",
+									"pm.collectionVariables.set(\"clevaVersion\", jsonData.data.applicationServer.version);\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.info(pm.collectionVariables.get('folderName') + \" --> \" + this.request.name);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/system/info",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"system",
+								"info"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Prérequis contrat GAV",
+			"item": [
+				{
+					"name": "Connexion CLEVA",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const moment = require('moment');\r",
+									"pm.collectionVariables.set(\"dateDuJour\", moment().format(\"YYYY-MM-DD\"));\r",
+									"pm.collectionVariables.set(\"dateDuJour_Plus_1_Mois\", moment().add(30, 'days').format(\"YYYY-MM-DD\"));\r",
+									"pm.collectionVariables.set(\"dateDuJour_Plus_6_Mois\", moment().add(180, 'days').format(\"YYYY-MM-DD\"));\r",
+									"pm.collectionVariables.set(\"dateDuJour_Moins_1_Mois\", moment().add(-30, 'days').format(\"YYYY-MM-DD\"));\r",
+									"pm.collectionVariables.set(\"dateDuJour_Moins_6_Mois\", moment().add(-180, 'days').format(\"YYYY-MM-DD\"));\r",
+									"pm.collectionVariables.set(\"dateDuJourFormatRecherche\", moment().format(\"YYYY/MM/DD\"));\r",
+									"\r",
+									"\r",
+									"// sets locale to de\r",
+									"this.locale = \"fr\";\r",
+									"console.info(pm.collectionVariables.get('folderName') + \" --> \" + this.request.name);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"token\", pm.response.text());",
+									"",
+									"",
+									"console.log(pm.response.text());"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "AALR",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "ALR",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"type": "text",
+								"value": "text/plain"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"login\": \"{{login}}\",\n    \"password\": \"{{password}}\"\n}"
+						},
+						"url": {
+							"raw": "{{url}}/me/login",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"me",
+								"login"
+							]
+						},
+						"description": "Chargement d'une tâche"
+					},
+					"response": []
+				},
+				{
+					"name": "Liste Civilités personne",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"let jsonData = pm.response.json();\r",
+									"\r",
+									"// valeurs\r",
+									"let codes = jsonData.data.values;\r",
+									"\r",
+									"//Template for list\r",
+									"pm.visualizer.set(pm.collectionVariables.get(\"templateListes\"), {\r",
+									"    response: pm.response.json()\r",
+									"});\r",
+									"\r",
+									"//Setting variables\r",
+									"pm.collectionVariables.set(\"customerGAVCivilite\", codes[_.random(0, codes.length-1)].code);\r",
+									"\r",
+									"\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.info(pm.collectionVariables.get('folderName') + \" --> \" + this.request.name);\r",
+									"\r",
+									"window = {};\r",
+									"\r",
+									"pm.sendRequest(\"https://cdnjs.cloudflare.com/ajax/libs/Faker/3.1.0/faker.min.js\", (error, response) => {\r",
+									"    if (error || response.code !== 200) {\r",
+									"        pm.expect.fail('Could not load external library');\r",
+									"    }\r",
+									"\r",
+									"    eval(response.text());\r",
+									"\r",
+									"    // This is where you can set the locale. See faker.js docs for all available locales.\r",
+									"    window.faker.locale=\"fr\";\r",
+									"    console.log(window.faker);\r",
+									"    console.log('Past', window.faker.date.past());\r",
+									"    console.log('future', window.faker.date.future());\r",
+									"    console.log('between', window.faker.date.between());\r",
+									"    console.log('recent', window.faker.date.recent());\r",
+									"    console.log('weekday', window.faker.date.weekday());\r",
+									"\r",
+									"\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/settings/lists/:helpListCode",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"settings",
+								"lists",
+								":helpListCode"
+							],
+							"query": [
+								{
+									"key": "text",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "maxResult",
+									"value": "15",
+									"disabled": true
+								},
+								{
+									"key": "personType",
+									"value": "NATURAL",
+									"disabled": true
+								}
+							],
+							"variable": [
+								{
+									"key": "helpListCode",
+									"value": "PPSIARD_PGID1_SITUATION_MARITALE"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Liste nombre enfants",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"let jsonData = pm.response.json();\r",
+									"\r",
+									"let codes = jsonData.data.values;\r",
+									"\r",
+									"\r",
+									"//Set title code\r",
+									"pm.collectionVariables.set(\"nombreEnfants\", codes[_.random(0, codes.length-1)].code);\r",
+									"\r",
+									"pm.visualizer.set(pm.collectionVariables.get(\"templateListes\"), {\r",
+									"    response: pm.response.json()\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.info(pm.collectionVariables.get('folderName') + \" --> \" + this.request.name);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/settings/lists/:helpListCode",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"settings",
+								"lists",
+								":helpListCode"
+							],
+							"query": [
+								{
+									"key": "text",
+									"value": "culture",
+									"disabled": true
+								},
+								{
+									"key": "maxResult",
+									"value": "15",
+									"disabled": true
+								}
+							],
+							"variable": [
+								{
+									"key": "helpListCode",
+									"value": "PPSIARD_SOCLE_NOMBRE_ENFANTS",
+									"description": "(Required) Code of the HelpList"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Liste Assurer conjoint O/N",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.info(pm.collectionVariables.get('folderName') + \" --> \" + this.request.name);\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"let jsonData = pm.response.json();\r",
+									"\r",
+									"let codes = jsonData.data.values;\r",
+									"\r",
+									"//Set title code\r",
+									"pm.collectionVariables.set(\"PGID1_Assurer_Conjoint\", codes[_.random(0, codes.length-1)].code);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/settings/lists/:helpListCode?maxResult=15",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"settings",
+								"lists",
+								":helpListCode"
+							],
+							"query": [
+								{
+									"key": "text",
+									"value": "culture",
+									"disabled": true
+								},
+								{
+									"key": "maxResult",
+									"value": "15"
+								},
+								{
+									"key": "dtfdfg",
+									"value": "",
+									"disabled": true
+								}
+							],
+							"variable": [
+								{
+									"key": "helpListCode",
+									"value": "PPSIARD_SOCLE_OUI_NON",
+									"description": "(Required) Code of the HelpList"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Usages adresses",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.info(pm.collectionVariables.get('folderName') + \" --> \" + this.request.name);\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"let jsonData = pm.response.json();\r",
+									"\r",
+									"let codes = jsonData.data.values;\r",
+									"\r",
+									"//Set title code\r",
+									"pm.collectionVariables.set(\"Usage_Adresse_Principal\", codes[_.random(0, codes.length-1)].code);\r",
+									"pm.visualizer.set(pm.collectionVariables.get(\"templateListes\"), {\r",
+									"    response: pm.response.json()\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/settings/lists/:helpListCode?text=Prin",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"settings",
+								"lists",
+								":helpListCode"
+							],
+							"query": [
+								{
+									"key": "text",
+									"value": "Prin"
+								},
+								{
+									"key": "maxResult",
+									"value": "15",
+									"disabled": true
+								},
+								{
+									"key": "dtfdfg",
+									"value": "",
+									"disabled": true
+								}
+							],
+							"variable": [
+								{
+									"key": "helpListCode",
+									"value": "ADDRESS_USES",
+									"description": "(Required) Code of the HelpList"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Liste des villes",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.info(pm.collectionVariables.get('folderName') + \" --> \" + this.request.name);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"let jsonData = pm.response.json();\r",
+									"\r",
+									"let codes = jsonData.data.values;\r",
+									"\r",
+									"//Set title code\r",
+									"pm.collectionVariables.set(\"customerAdr\", codes[_.random(0, codes.length-1)]);\r",
+									"\r",
+									"pm.collectionVariables.set(\"customerAdrZipCode\", pm.collectionVariables.get(\"customerAdr\").code);\r",
+									"pm.collectionVariables.set(\"customerAdrCity\", pm.collectionVariables.get(\"customerAdr\").label);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/settings/lists/:helpListCode?zipCode=690",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"settings",
+								"lists",
+								":helpListCode"
+							],
+							"query": [
+								{
+									"key": "productCode",
+									"value": "PMID1",
+									"disabled": true
+								},
+								{
+									"key": "maxResult",
+									"value": "30",
+									"disabled": true
+								},
+								{
+									"key": "productRiskReference",
+									"value": "FR",
+									"disabled": true
+								},
+								{
+									"key": "zipCode",
+									"value": "690"
+								}
+							],
+							"variable": [
+								{
+									"key": "helpListCode",
+									"value": "CITIES"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Liste des pays",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.info(pm.collectionVariables.get('folderName') + \" --> \" + this.request.name);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"let jsonData = pm.response.json();\r",
+									"\r",
+									"let codes = jsonData.data.values;\r",
+									"\r",
+									"//Set title code\r",
+									"pm.collectionVariables.set(\"customerAdressCountryCode\", codes[_.random(0, codes.length-1)].code);\r",
+									"pm.visualizer.set(pm.collectionVariables.get(\"templateListes\"), {\r",
+									"    response: pm.response.json()\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/settings/lists/:helpListCode?code=FR",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"settings",
+								"lists",
+								":helpListCode"
+							],
+							"query": [
+								{
+									"key": "code",
+									"value": "FR"
+								}
+							],
+							"variable": [
+								{
+									"key": "helpListCode",
+									"value": "COUNTRIES"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Création client",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const moment = require('moment');\r",
+									"\r",
+									"window = {};\r",
+									"\r",
+									"pm.sendRequest(\"https://cdnjs.cloudflare.com/ajax/libs/Faker/3.1.0/faker.min.js\", (error, response) => {\r",
+									"    if (error || response.code !== 200) {\r",
+									"        pm.expect.fail('Could not load external library');\r",
+									"    }\r",
+									"\r",
+									"    eval(response.text());\r",
+									"\r",
+									"    // This is where you can set the locale. See faker.js docs for all available locales.\r",
+									"    window.faker.locale=\"fr\";\r",
+									"\r",
+									"    pm.collectionVariables.set(\"customerGAVPhoneNumber\",window.faker.phone.phoneNumber());\r",
+									"    pm.collectionVariables.set(\"streetAddress\",window.faker.address.streetAddress());\r",
+									"    pm.collectionVariables.set(\"customerGAVPersonFamilyName\", window.faker.name.lastName());\r",
+									"    pm.collectionVariables.set(\"customerGAVPersonFirstName\", window.faker.name.firstName());\r",
+									"    pm.collectionVariables.set(\"customerGAVEmail\", window.faker.internet.email());\r",
+									"    pm.collectionVariables.set(\"customerAdressLine1\",  window.faker.address.streetName());\r",
+									"    pm.collectionVariables.set(\"customerAdressLine2\", window.faker.address.streetAddress());\r",
+									"    pm.collectionVariables.set(\"customerAdressLine3\", window.faker.address.streetPrefix() + ' ' + window.faker.address.streetSuffix())  ;\r",
+									"    pm.collectionVariables.set(\"customerAdressLatitude\", window.faker.address.latitude());\r",
+									"    pm.collectionVariables.set(\"customerAdressLongitude\", window.faker.address.longitude());\r",
+									"\r",
+									"\r",
+									"});\r",
+									"\r",
+									"pm.collectionVariables.set(\"customerDNaissance\", moment().add(-30, 'years').format(\"YYYY-MM-DD\"));\r",
+									"\r",
+									"\r",
+									"console.info(pm.collectionVariables.get('folderName') + \" --> \" + this.request.name);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"let jsonData = pm.response.json();\r",
+									"\r",
+									"let customer = jsonData.data;\r",
+									"\r",
+									"//get ID\r",
+									"pm.collectionVariables.set(\"customerGAVId\", jsonData.data.id);\r",
+									"pm.collectionVariables.set(\"customerGAVPersonId\", jsonData.data.person.id);\r",
+									"pm.collectionVariables.set(\"customerGAVPersonFamilyName\", jsonData.data.person.familyName);\r",
+									"pm.collectionVariables.set(\"customerGAVPersonFirstName\", jsonData.data.person.firstName);\r",
+									"pm.collectionVariables.set(\"customerGAVPersonName\", jsonData.data.person.completeName);\r",
+									"pm.collectionVariables.set(\"customerGAVPersonBirthDate\", jsonData.data.person.birthDate);\r",
+									"pm.collectionVariables.set(\"customerGAVPersonZipCode\", jsonData.data.address.zipCode);\r",
+									"pm.collectionVariables.set(\"customerGAVEmail\", jsonData.data.communication.email);\r",
+									"\r",
+									"\r",
+									"console.log(\"URL pour consulter l'objet créé dans CLEVA Web :\")\r",
+									"console.log(pm.environment.get(\"clevaWebUrl\")+ \"personne/physique/\" +jsonData.data.person.id +\"/consultation\");\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"person\": {\r\n        \"familyName\": \"{{customerGAVPersonFamilyName}}\",\r\n        \"firstName\": \"{{customerGAVPersonFirstName}}\",\r\n        \"birthDate\": \"{{customerDNaissance}}\",\r\n        \"titleCode\": \"{{customerTitle}}\",\r\n        \"familySituationCode\": \"{{customerGAVCivilite}}\",\r\n        \"externalReference\": \"{{$timestamp}}\"\r\n    },\r\n    \"communication\": {\r\n        \"cellphone\": \"{{customerGAVPhoneNumber}}\",\r\n        \"email\": \"{{customerGAVEmail}}\"\r\n    },\r\n    \"address\": {\r\n        \"countryCode\": \"FR\",\r\n        \"mainAddress\": true,\r\n        \"line1\": \"{{customerAdressLine1}}\",\r\n        \"line2\": \"{{customerAdressLine2}}\",\r\n        \"line3\": \"{{customerAdressLine3}}\",\r\n        \"zipCode\": \"{{customerAdrZipCode}}\",\r\n        \"city\": \"{{customerAdrCity}}\",\r\n        \"latitude\": {{customerAdressLatitude}},\r\n        \"longitude\": {{customerAdressLongitude}}\r\n    },\r\n    \"ratingNumber\": \"{{$randomLoremWord}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/person/customers",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"person",
+								"customers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Ajouter une adresse fiscale",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const moment = require('moment');\r",
+									"\r",
+									"window = {};\r",
+									"\r",
+									"pm.sendRequest(\"https://cdnjs.cloudflare.com/ajax/libs/Faker/3.1.0/faker.min.js\", (error, response) => {\r",
+									"    if (error || response.code !== 200) {\r",
+									"        pm.expect.fail('Could not load external library');\r",
+									"    }\r",
+									"\r",
+									"    eval(response.text());\r",
+									"\r",
+									"    // This is where you can set the locale. See faker.js docs for all available locales.\r",
+									"    window.faker.locale=\"fr\";\r",
+									"\r",
+									"    pm.collectionVariables.set(\"streetAddress\",window.faker.address.streetAddress());\r",
+									"    pm.collectionVariables.set(\"customerAdrZipCode\", window.faker.address.zipCode());\r",
+									"    pm.collectionVariables.set(\"customerAdrCity\", window.faker.address.city());\r",
+									"    pm.collectionVariables.set(\"customerAdressLine1\",  window.faker.address.streetName());\r",
+									"    pm.collectionVariables.set(\"customerAdressLine2\", window.faker.address.streetAddress());\r",
+									"    pm.collectionVariables.set(\"customerAdressLine3\", window.faker.address.streetPrefix() + ' ' + window.faker.address.streetSuffix())  ;\r",
+									"    pm.collectionVariables.set(\"customerAdressLatitude\", window.faker.address.latitude());\r",
+									"    pm.collectionVariables.set(\"customerAdressLongitude\", window.faker.address.longitude());\r",
+									"\r",
+									"\r",
+									"});\r",
+									"\r",
+									"\r",
+									"console.info(pm.collectionVariables.get('folderName') + \" --> \" + this.request.name);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"let jsonData = pm.response.json();\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n        \"activeUses\": [\r\n            \"FI\"\r\n        ],\r\n        \"countryCode\": \"FR\",\r\n        \"line1\": \"{{customerAdressLine1}}\",\r\n        \"line2\": \"{{customerAdressLine2}}\",\r\n        \"line3\": \"{{customerAdressLine3}}\",\r\n        \"zipCode\": \"{{customerAdrZipCode}}\",\r\n        \"city\": \"{{customerAdrCity}}\",\r\n        \"latitude\": {{customerAdressLatitude}},\r\n        \"longitude\": {{customerAdressLongitude}}\r\n    }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/persons/:id/addresses",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"persons",
+								":id",
+								"addresses"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{customerGAVPersonId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Modifier client",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const moment = require('moment');\r",
+									"\r",
+									"\r",
+									"\r",
+									"pm.sendRequest(\"https://randomuser.me/api/?nat=fr\", (err, res) => {\r",
+									"    pm.collectionVariables.set('customerGender', (res.json().results[0].gender.toUpperCase()))\r",
+									"    pm.collectionVariables.set('customerDNaissance', moment(res.json().results[0].dob.date).format(\"YYYY-MM-DD\"))\r",
+									"     pm.collectionVariables.set('customerAdrZipCode', res.json().results[0].location.postcode),\r",
+									"    pm.collectionVariables.set('customerAdrCity', res.json().results[0].location.city)\r",
+									"    pm.collectionVariables.set('customerAdressNumber', res.json().results[0].location.street.number)\r",
+									"    pm.collectionVariables.set('customerAdressStreetName', res.json().results[0].location.street.name)\r",
+									"}) \r",
+									"\r",
+									"console.info(pm.collectionVariables.get('folderName') + \" --> \" + this.request.name);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"let jsonData = pm.response.json();\r",
+									"\r",
+									"//get ID\r",
+									"pm.collectionVariables.set(\"customerGAVId\", jsonData.data.id);\r",
+									"pm.collectionVariables.set(\"customerGAVPersonId\", jsonData.data.person.id);\r",
+									"pm.collectionVariables.set(\"customerGAVPersonName\", jsonData.data.person.completeName);\r",
+									"pm.collectionVariables.set(\"customerGAVEmail\", jsonData.data.communication.email);\r",
+									"\r",
+									"console.log(\"URL pour consulter l'objet créé dans CLEVA Web :\")\r",
+									"console.log(pm.environment.get(\"clevaWebUrl\")+ \"personne/physique/\" +jsonData.data.person.id +\"/consultation\");\r",
+									"\r",
+									"console.log(pm.response.json());\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"communication\": {\r\n        \"cellphone\": \"{{$randomPhoneNumber}}\",\r\n        \"email\": \"{{$randomEmail}}\"\r\n    },\r\n    \"ratingNumber\": \"{{$randomLoremWord}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/person/customers/:id",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"person",
+								"customers",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{customerGAVId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Tarification",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.info(pm.collectionVariables.get('folderName') + \" --> \" + this.request.name);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"const jsonData = pm.response.json();\r",
+									"\r",
+									"let variantes = jsonData.data.warrantyBundles;\r",
+									"\r",
+									"pm.test(\"Nombre de variantes doit être 3\", function () {\r",
+									"    pm.expect(variantes.length).to.eql(3);\r",
+									"});\r",
+									"\r",
+									"function isExclusive(variante) {\r",
+									"  return variante.exclusive == true;\r",
+									"}\r",
+									"\r",
+									"function isOptionnelle(variante) {\r",
+									"  return variante.exclusive == false || variante.exclusive == null;;\r",
+									"}\r",
+									"\r",
+									"let variantesExclusives = variantes.findAll(isExclusive);\r",
+									"if (variantesExclusives.length == 0){\r",
+									"    console.warn(\"Je soupçonne un mauvais paramétrage des variantes exclusives!!\")\r",
+									"}\r",
+									"let variantesOptionnelles = variantes.findAll(isOptionnelle);\r",
+									"if (variantesOptionnelles.length == 0){\r",
+									"    console.warn(\"Je soupçonne un mauvais paramétrage des variantes optionnelles!!\")\r",
+									"}\r",
+									"//Set title code\r",
+									"pm.collectionVariables.set(\"varianteExclusiveGAV\", variantesExclusives[_.random(0, variantesExclusives.length-1)].id);\r",
+									"pm.collectionVariables.set(\"varianteOptionGAV\", variantesOptionnelles[_.random(0, variantesOptionnelles.length-1)].id);\r",
+									"\r",
+									"console.log(\"Variante exclusive selectionnée : \"+ pm.collectionVariables.get(\"varianteExclusiveGAV\"));\r",
+									"console.log(\"Variante optionnelle selectionnée : \"+pm.collectionVariables.get(\"varianteOptionGAV\"));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"productCode\": \"PGID1\",\r\n    \"freeZones\": {\r\n        \"PPSIARD_SOCLE_CODE_PROMOTION\": {\r\n            \"type\": \"STRING\",\r\n            \"value\": \"REDUC_50\"\r\n        }\r\n    },\r\n    \"risk\": {\r\n        \"freeZones\": {\r\n            \"PPSIARD_PGID1_DATE_NAISSANCE\": {\r\n                \"type\": \"DATE\",\r\n                \"value\": \"{{customerDNaissance}}\"\r\n            },\r\n            \"PPSIARD_PGID1_PROFESSION\": {\r\n                \"type\": \"STRING\",\r\n                \"value\": \"564b\"\r\n            },\r\n            \"PPSIARD_PGID1_SITUATION_FAMILIALE\": {\r\n                \"type\": \"STRING\",\r\n                \"value\": \"{{customerGAVCivilite}}\"\r\n            },\r\n            \"PPSIARD_PGID1_ASSURER_CONJOINT\": {\r\n                \"type\": \"STRING\",\r\n                \"value\": \"O\"\r\n            },\r\n            \"PPSIARD_PGID1_NOMBRE_ENFANTS\": {\r\n                \"type\": \"NUMERIC\",\r\n                \"value\": {{nombreEnfants}}\r\n            },\r\n            \"PPSIARD_PGID1_SPORT_A_RISQUE\": {\r\n                \"type\": \"STRING\",\r\n                \"value\": \"O\"\r\n            }\r\n        }\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/misc/pricing",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"misc",
+								"pricing"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Devis",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"let jsonData = pm.response.json();\r",
+									"\r",
+									"//get ID\r",
+									"pm.collectionVariables.set(\"devisGAVId\", jsonData.data.id);\r",
+									"pm.collectionVariables.set(\"devisGAVNumber\", jsonData.data.number);\r",
+									"\r",
+									"let intervenants = jsonData.data.risk.interveners;\r",
+									"\r",
+									"function isConjoint(intervenant) {\r",
+									"  return intervenant.roleCode == 'CONJOINT';\r",
+									"}\r",
+									"\r",
+									"function isEnfant(intervenant) {\r",
+									"  return intervenant.roleCode == 'ENFANT' \r",
+									"}\r",
+									"\r",
+									"let conjoint = intervenants.find(isConjoint);\r",
+									"let enfant = intervenants.find(isEnfant);\r",
+									"\r",
+									"pm.collectionVariables.set(\"intervenantConjointPersonId\", conjoint.person.id);\r",
+									"pm.collectionVariables.set(\"intervenantEnfantPersonId\", enfant.person.id);\r",
+									"\r",
+									"console.log(\"URL pour consulter l'objet créé dans CLEVA Web :\")\r",
+									"console.log(pm.environment.get(\"clevaWebUrl\")+ \"iard/ird/\" +jsonData.data.id +\"/consultation\");"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.info(pm.collectionVariables.get('folderName') + \" --> \" + this.request.name);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "validationOnly",
+								"value": "true",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"customerId\": \"{{customerGAVId}}\",\r\n    \"freeZones\": {\r\n        \"PPSIARD_SOCLE_CODE_PROMOTION\": {\r\n            \"type\": \"STRING\",\r\n            \"value\": \"REDUC_50\"\r\n        }\r\n    },\r\n    \"productCode\": \"PGID1\",\r\n    \"risk\": {\r\n        \"freeZones\": {\r\n            \"PPSIARD_PGID1_DATE_NAISSANCE\": {\r\n                \"type\": \"DATE\",\r\n                \"value\": \"{{customerDNaissance}}\"\r\n            },\r\n            \"PPSIARD_PGID1_PROFESSION\": {\r\n                \"type\": \"STRING\",\r\n                \"value\": \"564b\"\r\n            },\r\n            \"PPSIARD_PGID1_SITUATION_FAMILIALE\": {\r\n                \"type\": \"STRING\",\r\n                \"value\": \"{{customerGAVCivilite}}\"\r\n            },\r\n            \"PPSIARD_PGID1_ASSURER_CONJOINT\": {\r\n                \"type\": \"STRING\",\r\n                \"value\": \"O\"\r\n            },\r\n            \"PPSIARD_PGID1_NOMBRE_ENFANTS\": {\r\n                \"type\": \"NUMERIC\",\r\n                \"value\": {{nombreEnfants}}\r\n            },\r\n            \"PPSIARD_PGID1_SPORT_A_RISQUE\": {\r\n                \"type\": \"STRING\",\r\n                \"value\": \"O\"\r\n            }\r\n        },\r\n        \"interveners\": [\r\n            {\r\n                \"communication\": {\r\n                    \"cellphone\": \"{{$randomPhoneNumber}}\",\r\n                    \"email\": \"{{$randomEmail}}\"\r\n                },\r\n                \"person\": {\r\n                    \"familyName\": \"{{$randomLastName}}\",\r\n                    \"firstName\": \"{{$randomFirstName}}\",\r\n                    \"birthDate\": \"{{customerDNaissance}}\"\r\n                },\r\n                \"roleCode\": \"CONJOINT\"\r\n            },\r\n            {\r\n                \"communication\": {\r\n                    \"cellphone\": \"{{$randomPhoneNumber}}\",\r\n                    \"email\": \"{{$randomEmail}}\"\r\n                },\r\n                \"person\": {\r\n                    \"familyName\": \"{{$randomLastName}}\",\r\n                    \"firstName\": \"{{$randomFirstName}}\",\r\n                    \"birthDate\": \"{{customerDNaissance}}\"\r\n                },\r\n                \"roleCode\": \"ENFANT\"\r\n            }\r\n        ],\r\n        \"warrantyBundleCodes\": [\r\n            \"{{varianteExclusiveGAV}}\",\r\n            \"{{varianteOptionGAV}}\"\r\n        ]\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/misc/contracts",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"misc",
+								"contracts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Ajouter RIB",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.info(pm.collectionVariables.get('folderName') + \" --> \" + this.request.name);\r",
+									"\r",
+									"const moment = require('moment');\r",
+									"\r",
+									"window = {};\r",
+									"\r",
+									"pm.sendRequest(\"https://cdnjs.cloudflare.com/ajax/libs/Faker/3.1.0/faker.min.js\", (error, response) => {\r",
+									"    if (error || response.code !== 200) {\r",
+									"        pm.expect.fail('Could not load external library');\r",
+									"    }\r",
+									"\r",
+									"    eval(response.text());\r",
+									"\r",
+									"    // This is where you can set the locale. See faker.js docs for all available locales.\r",
+									"    window.faker.locale=\"fr\";\r",
+									"\r",
+									"\r",
+									"    pm.collectionVariables.set(\"bankZipCode\", window.faker.address.zipCode());\r",
+									"    pm.collectionVariables.set(\"bankAdrCity\", window.faker.address.city());\r",
+									"\r",
+									"    pm.collectionVariables.set(\"bankAdressLine1\",  window.faker.address.streetName());\r",
+									"    pm.collectionVariables.set(\"bankAdressLine2\", window.faker.address.streetPrefix() + ' ' + window.faker.address.streetSuffix())  ;\r",
+									"\r",
+									"\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"let jsonData = pm.response.json();\r",
+									"\r",
+									"pm.collectionVariables.set(\"bankDetailsCustomerGAVId\", jsonData.data.id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"activeUses\": [\n        \"P\"\n    ],\n    \"iban\": \"FR3312739000709454623771J14\",\n    \"holder\": \"{{customerGAVPersonName}}\",\n    \"bic\": \"AGRIFRPP835\",\n    \"bank\": \"Crédit Agricole\",\n    \"bankAddress1\": \"1 rue baraban\",\n    \"zipCode\": \"69007\",\n    \"city\": \"LYON\",\n    \"type\": \"{{$randomBankAccountName}}\",\n    \"countryCode\": \"FR\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/persons/:id/bankDetails",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"persons",
+								":id",
+								"bankDetails"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{customerGAVPersonId}}",
+									"description": "(Required) "
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Modifier le devis",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"let jsonData = pm.response.json();\r",
+									"\r",
+									"//get ID\r",
+									"pm.collectionVariables.set(\"devisGAVId\", jsonData.data.id);\r",
+									"console.log(\"URL pour consulter l'objet créé dans CLEVA Web :\")\r",
+									"console.log(pm.environment.get(\"clevaWebUrl\")+ \"iard/ird/\" +jsonData.data.id +\"/consultation\");"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.info(pm.collectionVariables.get('folderName') + \" --> \" + this.request.name);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"risk\": {\r\n        \"freeZones\": {\r\n            \"PPSIARD_PGID1_DATE_NAISSANCE\": {\r\n                \"type\": \"DATE\",\r\n                \"value\": \"{{customerDNaissance}}\"\r\n            },\r\n            \"PPSIARD_PGID1_NOMBRE_ENFANTS\": {\r\n                \"type\": \"NUMERIC\",\r\n                \"value\": {{nombreEnfants}}\r\n            },\r\n            \"PPSIARD_PGID1_SPORT_A_RISQUE\": {\r\n                \"type\": \"STRING\",\r\n                \"value\": \"O\"\r\n            }\r\n        },\r\n        \"warrantyBundleCodes\": [\r\n            \"{{varianteExclusiveGAV}}\",\r\n            \"{{varianteOptionGAV}}\"\r\n        ]\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/misc/contracts/:id",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"misc",
+								"contracts",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{devisGAVId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Souscrire",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"let jsonData = pm.response.json();\r",
+									"\r",
+									"//get ID\r",
+									"pm.collectionVariables.set(\"contractGAVId\", jsonData.data.contract.id);\r",
+									"pm.collectionVariables.set(\"contractGAVNumber\", jsonData.data.contract.id);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.info(pm.collectionVariables.get('folderName') + \" --> \" + this.request.name);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/misc/contracts/:id/subscribe",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"misc",
+								"contracts",
+								":id",
+								"subscribe"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{devisGAVId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"pm.collectionVariables.set('folderName','Parcours GAV');"
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Listes globales",
+			"item": [
+				{
+					"name": "Listes des produits",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"let jsonData = pm.response.json();\r",
+									"\r",
+									"let codes = jsonData.data.values;\r",
+									"\r",
+									"\r",
+									"pm.collectionVariables.set(\"productCode\", codes[_.random(0, codes.length-1)].code);\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.info(pm.collectionVariables.get('folderName') + \" --> \" + this.request.name);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/settings/lists/:helpListCode?text=Garant",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"settings",
+								"lists",
+								":helpListCode"
+							],
+							"query": [
+								{
+									"key": "text",
+									"value": "Garant"
+								},
+								{
+									"key": "maxResult",
+									"value": "20",
+									"disabled": true
+								},
+								{
+									"key": "code",
+									"value": "01.11",
+									"disabled": true
+								}
+							],
+							"variable": [
+								{
+									"key": "helpListCode",
+									"value": "PRODUCTS_CODE"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/settings/lists/:helpListCode?text=Accide",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"settings",
+										"lists",
+										":helpListCode"
+									],
+									"query": [
+										{
+											"key": "text",
+											"value": "Accide"
+										},
+										{
+											"key": "maxResult",
+											"value": "20",
+											"disabled": true
+										},
+										{
+											"key": "code",
+											"value": "01.11",
+											"disabled": true
+										}
+									],
+									"variable": [
+										{
+											"key": "helpListCode",
+											"value": "PRODUCTS_CODE"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 29 Dec 2021 10:55:12 GMT"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=20"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Server",
+									"value": ""
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"code\": 200,\n    \"data\": {\n        \"code\": \"PRODUCTS_CODE\",\n        \"description\": \"Products\",\n        \"moreResults\": false,\n        \"title\": \"Products\",\n        \"type\": \"BUILTIN\",\n        \"values\": [\n            {\n                \"code\": \"PGID1\",\n                \"details\": {\n                    \"branchCode\": \"PREVOYANCE\",\n                    \"riskActivity.0\": \"IARD\",\n                    \"riskReference.0\": \"1\",\n                    \"riskName.0\": \"Objet Gav\",\n                    \"riskType.0\": \"MISC\",\n                    \"cardinality\": \"INDIVIDUAL\",\n                    \"branchLabel\": \"Prévoyance\"\n                },\n                \"label\": \"Souche Garantie accident de la vie\"\n            }\n        ]\n    },\n    \"status\": \"SUCCESS\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Liste titres de personnes",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"let jsonData = pm.response.json();\r",
+									"\r",
+									"let codes = jsonData.data.values;\r",
+									"\r",
+									"pm.collectionVariables.set(\"personTitles\", codes);\r",
+									"//Set title code\r",
+									"pm.collectionVariables.set(\"customerTitle\", codes[_.random(0, codes.length-1)].code);\r",
+									"//Set title code\r",
+									"pm.collectionVariables.set(\"contactTitle\", codes[_.random(0, codes.length-1)].code);\r",
+									"\r",
+									"pm.visualizer.set(pm.collectionVariables.get(\"templateListes\"), {\r",
+									"    response: pm.response.json()\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.info(pm.collectionVariables.get('folderName') + \" --> \" + this.request.name);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/settings/lists/:helpListCode?personType=NATURAL",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"settings",
+								"lists",
+								":helpListCode"
+							],
+							"query": [
+								{
+									"key": "text",
+									"value": "culture",
+									"disabled": true
+								},
+								{
+									"key": "maxResult",
+									"value": "15",
+									"disabled": true
+								},
+								{
+									"key": "personType",
+									"value": "NATURAL"
+								}
+							],
+							"variable": [
+								{
+									"key": "helpListCode",
+									"value": "TITLES",
+									"description": "(Required) Code of the HelpList"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Liste des villes",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.info(pm.collectionVariables.get('folderName') + \" --> \" + this.request.name);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.visualizer.set(pm.collectionVariables.get(\"templateListes\"), {\r",
+									"    response: pm.response.json()\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/settings/lists/:helpListCode?zipCode=69007",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"settings",
+								"lists",
+								":helpListCode"
+							],
+							"query": [
+								{
+									"key": "productCode",
+									"value": "PMID1",
+									"disabled": true
+								},
+								{
+									"key": "maxResult",
+									"value": "15",
+									"disabled": true
+								},
+								{
+									"key": "productRiskReference",
+									"value": "FR",
+									"disabled": true
+								},
+								{
+									"key": "zipCode",
+									"value": "69007"
+								}
+							],
+							"variable": [
+								{
+									"key": "helpListCode",
+									"value": "CITIES"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Liste des garanties",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.info(pm.collectionVariables.get('folderName') + \" --> \" + this.request.name);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"const jsonData = pm.response.json();\r",
+									"\r",
+									"const garanties = jsonData.data.values;\r",
+									"\r",
+									"pm.test(\"5 garanties paramétrées sur ce produit\", function () {\r",
+									"    pm.expect(garanties.length).to.eql(5);\r",
+									"});\r",
+									"\r",
+									"pm.visualizer.set(pm.collectionVariables.get(\"templateListes\"), {\r",
+									"    response: pm.response.json()\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/settings/lists/:helpListCode?productCode={{productCode}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"settings",
+								"lists",
+								":helpListCode"
+							],
+							"query": [
+								{
+									"key": "productCode",
+									"value": "{{productCode}}"
+								},
+								{
+									"key": "maxResult",
+									"value": "15",
+									"disabled": true
+								},
+								{
+									"key": "text",
+									"value": "Vol",
+									"disabled": true
+								},
+								{
+									"key": "riskReference",
+									"value": "1",
+									"disabled": true
+								}
+							],
+							"variable": [
+								{
+									"key": "helpListCode",
+									"value": "WARRANTIES_CONFIGURATIONS"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"pm.collectionVariables.set('folderName','Listes globales');"
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Sinistre GAV (Accident domestique)",
+			"item": [
+				{
+					"name": "Connexion CLEVA",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"token\", pm.response.text());",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"",
+									"",
+									"console.log(pm.response.text());"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "AALR",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "ALR",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"type": "text",
+								"value": "text/plain"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"login\": \"{{login}}\",\n    \"password\": \"{{password}}\"\n}"
+						},
+						"url": {
+							"raw": "{{url}}/me/login",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"me",
+								"login"
+							]
+						},
+						"description": "Chargement d'une tâche"
+					},
+					"response": []
+				},
+				{
+					"name": "Liste natures de sinistre",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"let jsonData = pm.response.json();\r",
+									"\r",
+									"let codes = jsonData.data.values;\r",
+									"\r",
+									"//Set title code\r",
+									"pm.collectionVariables.set(\"Accident_Domestique_Nature\", codes[_.random(0, codes.length-1)].code);\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.info(this.request.name);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/settings/lists/:helpListCode?productCode={{productCode}}&text=Accident do",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"settings",
+								"lists",
+								":helpListCode"
+							],
+							"query": [
+								{
+									"key": "productCode",
+									"value": "{{productCode}}"
+								},
+								{
+									"key": "text",
+									"value": "Accident do"
+								}
+							],
+							"variable": [
+								{
+									"key": "helpListCode",
+									"value": "CLAIM_NATURES"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/settings/lists/:helpListCode?productCode={{produitPMID1Code}}&text=Dégâts",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"settings",
+										"lists",
+										":helpListCode"
+									],
+									"query": [
+										{
+											"key": "productCode",
+											"value": "{{produitPMID1Code}}"
+										},
+										{
+											"key": "text",
+											"value": "Dégâts"
+										}
+									],
+									"variable": [
+										{
+											"key": "helpListCode",
+											"value": "CLAIM_NATURES"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 29 Dec 2021 16:16:23 GMT"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=20"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Server",
+									"value": ""
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"code\": 200,\n    \"data\": {\n        \"code\": \"CLAIM_NATURES\",\n        \"description\": \"List of natures of IARD claims\",\n        \"moreResults\": false,\n        \"title\": \"ClaimNatures\",\n        \"type\": \"BUILTIN\",\n        \"values\": [\n            {\n                \"code\": \"MRHDDE\",\n                \"label\": \"Dégâts des eaux \"\n            }\n        ]\n    },\n    \"status\": \"SUCCESS\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Liste des états de sinistres",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"let jsonData = pm.response.json();\r",
+									"\r",
+									"let codes = jsonData.data.values;"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.info(this.request.name);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/settings/lists/:helpListCode",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"settings",
+								"lists",
+								":helpListCode"
+							],
+							"query": [
+								{
+									"key": "text",
+									"value": "Dégâts",
+									"disabled": true
+								}
+							],
+							"variable": [
+								{
+									"key": "helpListCode",
+									"value": "CLAIM_STATUSES"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/settings/lists/:helpListCode?productCode={{produitPMID1Code}}&text=Dégâts",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"settings",
+										"lists",
+										":helpListCode"
+									],
+									"query": [
+										{
+											"key": "productCode",
+											"value": "{{produitPMID1Code}}"
+										},
+										{
+											"key": "text",
+											"value": "Dégâts"
+										}
+									],
+									"variable": [
+										{
+											"key": "helpListCode",
+											"value": "CLAIM_NATURES"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 29 Dec 2021 16:16:23 GMT"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=20"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Server",
+									"value": ""
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"code\": 200,\n    \"data\": {\n        \"code\": \"CLAIM_NATURES\",\n        \"description\": \"List of natures of IARD claims\",\n        \"moreResults\": false,\n        \"title\": \"ClaimNatures\",\n        \"type\": \"BUILTIN\",\n        \"values\": [\n            {\n                \"code\": \"MRHDDE\",\n                \"label\": \"Dégâts des eaux \"\n            }\n        ]\n    },\n    \"status\": \"SUCCESS\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Liste des natures de sous dossier",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"let jsonData = pm.response.json();\r",
+									"\r",
+									"let codes = jsonData.data.values;\r",
+									"\r",
+									"//Set title code\r",
+									"pm.collectionVariables.set(\"Accident_Domestique_Nature_Sous_Dossier\", codes[_.random(0, codes.length-1)].code);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.info(this.request.name);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/settings/lists/:helpListCode?claimNature={{Accident_Domestique_Nature}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"settings",
+								"lists",
+								":helpListCode"
+							],
+							"query": [
+								{
+									"key": "text",
+									"value": "MDIM",
+									"disabled": true
+								},
+								{
+									"key": "maxResult",
+									"value": "15",
+									"disabled": true
+								},
+								{
+									"key": "claimNature",
+									"value": "{{Accident_Domestique_Nature}}"
+								}
+							],
+							"variable": [
+								{
+									"key": "helpListCode",
+									"value": "CLAIM_SUBFOLDER_NATURES"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/settings/lists/:helpListCode?text=MDIM&claimNature={{Nature_Sinistre_DDE}}",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"settings",
+										"lists",
+										":helpListCode"
+									],
+									"query": [
+										{
+											"key": "text",
+											"value": "MDIM"
+										},
+										{
+											"key": "maxResult",
+											"value": "15",
+											"disabled": true
+										},
+										{
+											"key": "claimNature",
+											"value": "{{Nature_Sinistre_DDE}}"
+										}
+									],
+									"variable": [
+										{
+											"key": "helpListCode",
+											"value": "CLAIM_SUBFOLDER_NATURES"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 29 Dec 2021 16:16:49 GMT"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=20"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Server",
+									"value": ""
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"code\": 200,\n    \"data\": {\n        \"code\": \"CLAIM_SUBFOLDER_NATURES\",\n        \"description\": \"List of sub-folder natures of an IARD claim\",\n        \"moreResults\": false,\n        \"title\": \"ClaimSubfolderNatures\",\n        \"type\": \"BUILTIN\",\n        \"values\": [\n            {\n                \"code\": \"MDIM\",\n                \"label\": \"Dommages immatériels - MRH\"\n            }\n        ]\n    },\n    \"status\": \"SUCCESS\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Liste des rôles d'intervenant",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.info(pm.collectionVariables.get('folderName') + \" --> \" + this.request.name);\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"let jsonData = pm.response.json();\r",
+									"\r",
+									"let codes = jsonData.data.values;"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/settings/lists/:helpListCode?productCode={{productCode}}&domain=CLAMIS",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"settings",
+								"lists",
+								":helpListCode"
+							],
+							"query": [
+								{
+									"key": "productCode",
+									"value": "{{productCode}}"
+								},
+								{
+									"key": "domain",
+									"value": "CLAMIS"
+								},
+								{
+									"key": "riskReference",
+									"value": "",
+									"disabled": true
+								}
+							],
+							"variable": [
+								{
+									"key": "helpListCode",
+									"value": "INTERVENER_ROLES",
+									"description": "(Required) Code of the HelpList"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/settings/lists/:helpListCode?productCode={{produitPMID1Code}}&domain=CLAMIS",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"settings",
+										"lists",
+										":helpListCode"
+									],
+									"query": [
+										{
+											"key": "productCode",
+											"value": "{{produitPMID1Code}}"
+										},
+										{
+											"key": "domain",
+											"value": "CLAMIS"
+										},
+										{
+											"key": "riskReference",
+											"value": "",
+											"disabled": true
+										}
+									],
+									"variable": [
+										{
+											"key": "helpListCode",
+											"value": "INTERVENER_ROLES",
+											"description": "(Required) Code of the HelpList"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 29 Dec 2021 16:17:00 GMT"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=20"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Server",
+									"value": ""
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"code\": 200,\n    \"data\": {\n        \"code\": \"INTERVENER_ROLES\",\n        \"description\": \"Intervener Role Codes\",\n        \"moreResults\": false,\n        \"title\": \"IntervenerRoleCodes\",\n        \"type\": \"BUILTIN\",\n        \"values\": [\n            {\n                \"code\": \"CONJOINT\",\n                \"label\": \"Conjoint\"\n            },\n            {\n                \"code\": \"ENFANT\",\n                \"label\": \"Enfant\"\n            }\n        ]\n    },\n    \"status\": \"SUCCESS\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Liste des origines de sinistre",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.info(pm.collectionVariables.get('folderName') + \" --> \" + this.request.name);\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"let jsonData = pm.response.json();\r",
+									"\r",
+									"let codes = jsonData.data.values;\r",
+									"//Set title code\r",
+									"pm.collectionVariables.set(\"origin\", codes[_.random(0, codes.length-1)].code);\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/settings/lists/:helpListCode",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"settings",
+								"lists",
+								":helpListCode"
+							],
+							"query": [
+								{
+									"key": "productCode",
+									"value": "{{produitPMID1Code}}",
+									"disabled": true
+								},
+								{
+									"key": "domain",
+									"value": "CLAMIS",
+									"disabled": true
+								},
+								{
+									"key": "riskReference",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "text",
+									"value": "En cours - En ",
+									"disabled": true
+								}
+							],
+							"variable": [
+								{
+									"key": "helpListCode",
+									"value": "PPSIARD_SOCLE_LST_SIN_ORIGINE",
+									"description": "(Required) Code of the HelpList"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/settings/lists/:helpListCode?productCode={{produitPMID1Code}}&domain=CLAMIS",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"settings",
+										"lists",
+										":helpListCode"
+									],
+									"query": [
+										{
+											"key": "productCode",
+											"value": "{{produitPMID1Code}}"
+										},
+										{
+											"key": "domain",
+											"value": "CLAMIS"
+										},
+										{
+											"key": "riskReference",
+											"value": "",
+											"disabled": true
+										}
+									],
+									"variable": [
+										{
+											"key": "helpListCode",
+											"value": "INTERVENER_ROLES",
+											"description": "(Required) Code of the HelpList"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 29 Dec 2021 16:17:00 GMT"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=20"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Server",
+									"value": ""
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"code\": 200,\n    \"data\": {\n        \"code\": \"INTERVENER_ROLES\",\n        \"description\": \"Intervener Role Codes\",\n        \"moreResults\": false,\n        \"title\": \"IntervenerRoleCodes\",\n        \"type\": \"BUILTIN\",\n        \"values\": [\n            {\n                \"code\": \"CONJOINT\",\n                \"label\": \"Conjoint\"\n            },\n            {\n                \"code\": \"ENFANT\",\n                \"label\": \"Enfant\"\n            }\n        ]\n    },\n    \"status\": \"SUCCESS\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Rechercher le contrat",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"const jsonData = pm.response.json();\r",
+									"\r",
+									"\r",
+									"pm.test(\"Limit check\", function () {\r",
+									"    pm.expect(jsonData.limit).to.eql(pm.collectionVariables.get(\"50_Limit\"));\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Offset check\", function () {\r",
+									"    pm.expect(jsonData.offset).to.eql(pm.collectionVariables.get(\"defaultOffset\"));\r",
+									"});\r",
+									";\r",
+									"\r",
+									"const contrats = jsonData.data;\r",
+									"//Récupération de l'Id du contrat \r",
+									"pm.collectionVariables.set(\"contratId\", contrats[_.random(0, contrats.length-1)].id);\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.info(this.request.name);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/contracts?productCode={{productCode}}&offset={{defaultOffset}}&limit={{50_Limit}}&status=CONTRACT&effectiveDate={{1MonthAgo}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"contracts"
+							],
+							"query": [
+								{
+									"key": "productCode",
+									"value": "{{productCode}}"
+								},
+								{
+									"key": "offset",
+									"value": "{{defaultOffset}}"
+								},
+								{
+									"key": "limit",
+									"value": "{{50_Limit}}"
+								},
+								{
+									"key": "status",
+									"value": "CONTRACT"
+								},
+								{
+									"key": "contractNumber",
+									"value": "{{contractGAVNumber}}",
+									"disabled": true
+								},
+								{
+									"key": "effectiveDate",
+									"value": "{{1MonthAgo}}"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/contracts?number={{devisMRHNumero}}&productCode={{produitPMID1Code}}&offset={{defaultOffset}}&limit={{defaultLimit}}",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"contracts"
+									],
+									"query": [
+										{
+											"key": "number",
+											"value": "{{devisMRHNumero}}"
+										},
+										{
+											"key": "productCode",
+											"value": "{{produitPMID1Code}}"
+										},
+										{
+											"key": "offset",
+											"value": "{{defaultOffset}}"
+										},
+										{
+											"key": "limit",
+											"value": "{{defaultLimit}}"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 29 Dec 2021 14:57:53 GMT"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=20"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Server",
+									"value": ""
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"code\": 200,\n    \"data\": [\n        {\n            \"adjustmentCoefficient\": 0,\n            \"branchCode\": \"INCENDIE\",\n            \"branchLabel\": \"Incendie et Eléments naturels\",\n            \"businessType\": \"MISC\",\n            \"cardinalityType\": \"INDIVIDUAL\",\n            \"comment\": \"If we index the protocol, we can get to the FTP transmitter through the 1080p IB pixel!\",\n            \"commercialCoefficient\": 0,\n            \"companyCode\": \"IARCI\",\n            \"companyLabel\": \"CLEVA IARD Compagnie\",\n            \"currentIndex\": 200,\n            \"customerDeposit\": \"0.0\",\n            \"customerId\": \"20000051\",\n            \"customerName\": \"BRUN LOUIS\",\n            \"debtRecoveryExclusion\": false,\n            \"freeZones\": {\n                \"PPSIARD_SOCLE_CAMPAGNE\": {},\n                \"PPSIARD_PMID1_FRAIS_POLICE\": {\n                    \"type\": \"STRING\",\n                    \"value\": \"5\"\n                },\n                \"PPSIARD_PMID1_LOI_HAMON\": {},\n                \"PPSIARD_SOCLE_CODE_PROMOTION\": {}\n            },\n            \"id\": \"20000060\",\n            \"indexCode\": \"FFB\",\n            \"indexable\": false,\n            \"insurerId\": \"1001361\",\n            \"insurerName\": \"INETUM INSURANCE\",\n            \"management\": {},\n            \"master\": false,\n            \"number\": \"PMID1-D-01016\",\n            \"origin\": 0,\n            \"payment\": {\n                \"bankDetailsUsageCode\": \"P\",\n                \"bankDetailsUsageLabel\": \"Principale\",\n                \"directDebitDay\": 5,\n                \"discountPayer\": \"CUSTOMER\",\n                \"endorsementDiscountCode\": \"VA\",\n                \"endorsementPayer\": \"CUSTOMER\",\n                \"endorsementPaymentCode\": \"PF\",\n                \"fiscalTerritory\": \"FCEMT\",\n                \"newBusinessPayer\": \"CUSTOMER\",\n                \"newBusinessPaymentCode\": \"PF\",\n                \"numberMonthsPaymentPeriod\": 12,\n                \"payablePersonCallName\": \"BRUN LOUIS\",\n                \"payerPersonId\": \"20000179\",\n                \"periodicity\": \"Annual\",\n                \"termPayer\": \"CUSTOMER\",\n                \"termPaymentCode\": \"PF\",\n                \"termPeriodicity\": \"TO_EXPIRE\"\n            },\n            \"previousIndex\": 200,\n            \"productCode\": \"PMID1\",\n            \"productLabel\": \"Souche multirisques habitation\",\n            \"provisionalPremiumCallRate\": 0,\n            \"revisable\": false,\n            \"riskType\": \"D100\",\n            \"searchDetails\": {\n                \"misc\": {\n                    \"annualPremium\": 361.71,\n                    \"formula\": \"SIMPLE\",\n                    \"formulaLabel\": \"SIMPLE\",\n                    \"fullAnnualPremium\": 427.98,\n                    \"riskDescription\": \"APPT 20 m2 69003 \"\n                }\n            },\n            \"status\": {\n                \"code\": \"QUOTE\",\n                \"creationDate\": \"2021-12-29\",\n                \"earliestDate\": \"2021-12-29\",\n                \"effectiveDate\": \"2021-12-29\",\n                \"effectiveTime\": \"2021-12-29\",\n                \"indexDate\": \"2021-12-29\",\n                \"mainDueDate\": \"1201\",\n                \"nextDueDate\": \"2022-12-01\",\n                \"nextDueDateCode\": \"2212\",\n                \"nextMainDueDate\": \"2022-12-01\",\n                \"originalContractEffectiveDate\": \"2021-12-29\",\n                \"quotationPriceValidityDate\": \"2022-01-28\",\n                \"startDate\": \"2021-12-29\",\n                \"subcode\": \"0\",\n                \"sublabel\": \"Devis\",\n                \"termBlocked\": false,\n                \"updateDate\": \"2021-12-29\"\n            }\n        }\n    ],\n    \"limit\": 10,\n    \"offset\": 0,\n    \"resultSize\": 1,\n    \"status\": \"SUCCESS\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Chargement du contrat",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"const jsonData = pm.response.json();\r",
+									"\r",
+									"//get ID\r",
+									"pm.collectionVariables.set(\"contratId\", jsonData.data.id);\r",
+									"pm.collectionVariables.set(\"risqueId\", jsonData.data.risk.id);\r",
+									"pm.collectionVariables.set(\"customerId\", jsonData.data.customerId);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.info(this.request.name);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/misc/contracts/:id",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"misc",
+								"contracts",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{contratId}}"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/misc/contracts/:id",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"misc",
+										"contracts",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{contratMRHId}}"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 29 Dec 2021 14:58:16 GMT"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=20"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Server",
+									"value": ""
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"code\": 200,\n    \"data\": {\n        \"adjustmentCoefficient\": 0,\n        \"branchCode\": \"INCENDIE\",\n        \"branchLabel\": \"Incendie et Eléments naturels\",\n        \"brokers\": [],\n        \"businessType\": \"MISC\",\n        \"cardinalityType\": \"INDIVIDUAL\",\n        \"coinsurance\": false,\n        \"comment\": \"You can't compress the card without parsing the solid state SMS circuit!\",\n        \"commercialCoefficient\": 0,\n        \"commissions\": {\n            \"coinsuranceApetitionCommission\": 0,\n            \"endorsementDeduced\": \"NOT_DEDUCTED_WITH_DEPOSIT_SLIP\",\n            \"newBusinessDeduced\": \"NOT_DEDUCTED_WITH_DEPOSIT_SLIP\",\n            \"termDeduced\": \"NOT_DEDUCTED_WITH_DEPOSIT_SLIP\",\n            \"terminationDeduced\": \"NOT_DEDUCTED_WITH_DEPOSIT_SLIP\",\n            \"totalCommissionRate\": 0\n        },\n        \"companyCode\": \"IARCI\",\n        \"companyLabel\": \"CLEVA IARD Compagnie\",\n        \"contacts\": [],\n        \"currentIndex\": 200,\n        \"customerDeposit\": \"0.0\",\n        \"customerId\": \"20000051\",\n        \"customerName\": \"BRUN LOUIS\",\n        \"debtRecoveryExclusion\": false,\n        \"freeZones\": {\n            \"PPSIARD_SOCLE_CAMPAGNE\": {},\n            \"PPSIARD_PMID1_FRAIS_POLICE\": {\n                \"type\": \"STRING\",\n                \"value\": \"5\"\n            },\n            \"PPSIARD_PMID1_LOI_HAMON\": {},\n            \"PPSIARD_SOCLE_CODE_PROMOTION\": {}\n        },\n        \"historisedContractNumber\": \"PMID1-D-01015\",\n        \"id\": \"20000058\",\n        \"indexCode\": \"FFB\",\n        \"indexable\": false,\n        \"insurerId\": \"1001361\",\n        \"insurerName\": \"INETUM INSURANCE\",\n        \"management\": {},\n        \"master\": false,\n        \"number\": \"PMID1-C-00798\",\n        \"origin\": 0,\n        \"payment\": {\n            \"bankDetailsUsageCode\": \"P\",\n            \"bankDetailsUsageLabel\": \"Principale\",\n            \"directDebitDay\": 5,\n            \"discountPayer\": \"CUSTOMER\",\n            \"endorsementDiscountCode\": \"VA\",\n            \"endorsementPayer\": \"CUSTOMER\",\n            \"endorsementPaymentCode\": \"PF\",\n            \"fiscalTerritory\": \"FCEMT\",\n            \"newBusinessPayer\": \"CUSTOMER\",\n            \"newBusinessPaymentCode\": \"PF\",\n            \"numberMonthsPaymentPeriod\": 12,\n            \"payablePersonCallName\": \"BRUN LOUIS\",\n            \"payerPersonId\": \"20000179\",\n            \"paymentAddress\": {\n                \"city\": \"Justineview\",\n                \"countryCode\": \"FR\",\n                \"countryName\": \"FRANCE\",\n                \"creationDate\": \"2021-12-29T15:29:12+01:00\",\n                \"id\": \"20000105\",\n                \"latitude\": 20.0006,\n                \"line1\": \"Elisa du Havre\",\n                \"line2\": \"4386 Julie Molière\",\n                \"line3\": \"Avenue Saint-Honoré\",\n                \"longitude\": -25.4186,\n                \"mainAddress\": true,\n                \"resume\": \"Elisa du Havre 4386 Julie Molière Avenue Saint-Honoré, 58250 Justineview, FRANCE\",\n                \"updateDate\": \"2021-12-29T15:44:17+01:00\",\n                \"validityDate\": \"2021-12-29\",\n                \"zipCode\": \"58250\"\n            },\n            \"periodicity\": \"Annual\",\n            \"termPayer\": \"CUSTOMER\",\n            \"termPaymentCode\": \"PF\",\n            \"termPeriodicity\": \"TO_EXPIRE\"\n        },\n        \"premiumSummary\": {\n            \"annualAmount\": 468.93,\n            \"fullAnnualAmount\": 555.83\n        },\n        \"previousIndex\": 200,\n        \"productCode\": \"PMID1\",\n        \"productLabel\": \"Souche multirisques habitation\",\n        \"provisionalPremiumCallRate\": 0,\n        \"quoteNumber\": \"PMID1-D-01015\",\n        \"revisable\": false,\n        \"risk\": {\n            \"acceptationsConditions\": [],\n            \"billingStartDate\": \"2021-12-29\",\n            \"branchLabel\": \"Incendie et Eléments naturels\",\n            \"clauses\": [\n                {\n                    \"code\": \"INCEN\",\n                    \"id\": \"20000065\",\n                    \"nature\": \"AUTOMATIC\",\n                    \"order\": 10,\n                    \"text\": \"Nous indemnisons votre habitation et vos biens endommagés en cas d'incendie, de chute de la foudre, d'explosion.\\r\\n\",\n                    \"title\": \"Clause Garantie Incendie\",\n                    \"type\": \"RISK\"\n                },\n                {\n                    \"code\": \"VOL**\",\n                    \"id\": \"20000064\",\n                    \"nature\": \"AUTOMATIC\",\n                    \"order\": 30,\n                    \"text\": \"Vous êtes couvert en cas de vol et de tentative de vol des biens présents dans votre logement à la suite d'une effraction, de menaces, de violences ou d'un abus de confiance à votre encontre. \\r\\nLes détériorations causées par le vol ou la tentative de vol sont également prises en charge. \\r\\nLes biens présents dans votre logement sont aussi couverts en cas de vandalisme, d'émeutes ou de mouvements populaires.\",\n                    \"title\": \"Clause garantie Vol\",\n                    \"type\": \"RISK\"\n                }\n            ],\n            \"common\": \"N\",\n            \"creationDate\": \"2021-12-29T15:37:37+01:00\",\n            \"discounts\": [],\n            \"effectiveDate\": \"2021-12-29\",\n            \"entryDate\": \"2021-12-29\",\n            \"formula\": \"CONFORT\",\n            \"formulaLabel\": \"CONFORT\",\n            \"freeZones\": {\n                \"PPSIARD_PMID1_ADRESSE3\": {\n                    \"type\": \"STRING\",\n                    \"value\": \"null\"\n                },\n                \"PPSIARD_PMID1_SUPERFICIE\": {\n                    \"type\": \"NUMERIC\",\n                    \"value\": 20\n                },\n                \"PPSIARD_PMID1_ADRESSE4\": {},\n                \"PPSIARD_PMID1_NOMBRE_OCCUPANT\": {\n                    \"type\": \"NUMERIC\",\n                    \"value\": 7\n                },\n                \"PPSIARD_PMID1_ADRESSE5\": {},\n                \"PPSIARD_PMID1_VILLE\": {\n                    \"type\": \"STRING\",\n                    \"value\": \"LYON 09\"\n                },\n                \"PPSIARD_PMID1_ADRESSE6\": {},\n                \"PPSIARD_PMID1_DEPENDANCE\": {},\n                \"PPSIARD_PMID1_ADRESSE2\": {\n                    \"type\": \"STRING\",\n                    \"value\": \"4386 Julie Molière\"\n                },\n                \"PPSIARD_PMID1_ZONE_VOL\": {\n                    \"type\": \"NUMERIC\",\n                    \"value\": 1\n                },\n                \"PPSIARD_PMID1_ZONE_RC\": {\n                    \"type\": \"NUMERIC\",\n                    \"value\": 6\n                },\n                \"PPSIARD_PMID1_PRESENCE_PISCINE\": {\n                    \"type\": \"STRING\",\n                    \"value\": \"O\"\n                },\n                \"PPSIARD_PMID1_ZONE_BRIS_DE_GLACES\": {\n                    \"type\": \"NUMERIC\",\n                    \"value\": 1\n                },\n                \"PPSIARD_PMID1_AUTRE\": {},\n                \"PPSIARD_PMID1_PAYS\": {\n                    \"type\": \"STRING\",\n                    \"value\": \"FRANCE\"\n                },\n                \"PPSIARD_PMID1_SURFACE_DEPENDANCES\": {\n                    \"type\": \"NUMERIC\",\n                    \"value\": 50\n                },\n                \"PPSIARD_PMID1_ASRESSE1\": {},\n                \"PPSIARD_PMID1_SURFACE_VERANDA\": {},\n                \"PPSIARD_PMID1_CEDEX\": {},\n                \"PPSIARD_PMID1_VALEUR_BIJOUX\": {\n                    \"type\": \"NUMERIC\",\n                    \"value\": 0\n                },\n                \"PPSIARD_PMID1_REFERENCE_EXTERNE\": {},\n                \"PPSIARD_PMID1_CODE_PAYS\": {\n                    \"type\": \"STRING\",\n                    \"value\": \"FR\"\n                },\n                \"PPSIARD_PMID1_NIVEAU_INDEMNISATION\": {\n                    \"type\": \"STRING\",\n                    \"value\": \"E\"\n                },\n                \"PPSIARD_PMID1_ZONE_DOMMAGES\": {\n                    \"type\": \"NUMERIC\",\n                    \"value\": 1\n                },\n                \"PPSIARD_PMID1_ADRESSE8\": {},\n                \"PPSIARD_PMID1_LOCALITE\": {},\n                \"PPSIARD_PMID1_PRESENCE_DEPENDANCE\": {\n                    \"type\": \"STRING\",\n                    \"value\": \"O\"\n                },\n                \"PPSIARD_PMID1_STATU_SOUSCRIPTEUR\": {\n                    \"type\": \"STRING\",\n                    \"value\": \"NONOCC_PROP\"\n                },\n                \"PPSIARD_PMID1_NOMBRE_PIECES_30M2\": {\n                    \"type\": \"NUMERIC\",\n                    \"value\": 3\n                },\n                \"PPSIARD_PMID1_PRESENCE_VERANDA\": {\n                    \"type\": \"STRING\",\n                    \"value\": \"O\"\n                },\n                \"PPSIARD_PMID1_TYPE_LOGEMENT\": {\n                    \"type\": \"STRING\",\n                    \"value\": \"APPT\"\n                },\n                \"PPSIARD_PMID1_NOMBRE_PERSONNE\": {},\n                \"PPSIARD_PMID1_CODE_POSTAL_VOL\": {},\n                \"PPSIARD_PMID1_TYPE_RESIDENCE\": {\n                    \"type\": \"STRING\",\n                    \"value\": \"S\"\n                },\n                \"PPSIARD_PMID1_DUREE_INOCCUPATION\": {},\n                \"PPSIARD_PMID1_CODE_POSTAL\": {\n                    \"type\": \"STRING\",\n                    \"value\": \"69003\"\n                },\n                \"PPSIARD_PMID1_ADRESSE_SAISE_GOOGLE\": {},\n                \"PPSIARD_PMID1_ETAGE\": {\n                    \"type\": \"STRING\",\n                    \"value\": \"D\"\n                },\n                \"PPSIARD_PMID1_VALEUR_BIENS\": {\n                    \"type\": \"NUMERIC\",\n                    \"value\": 10000\n                }\n            },\n            \"id\": \"20000153\",\n            \"identifier\": \"APPT 20 m2 69003 \",\n            \"interveners\": [],\n            \"lastVersionId\": \"20000153\",\n            \"mvtRegularized\": true,\n            \"name\": \"Risque habitation\",\n            \"nextVersionId\": \"0\",\n            \"option\": \"Assistance\",\n            \"productCode\": \"PMID1\",\n            \"productLabel\": \"Souche multirisques habitation\",\n            \"referenceObject\": \"1\",\n            \"startDate\": \"2021-12-29\",\n            \"tarificationDate\": \"2018-01-01\",\n            \"type\": \"D100\",\n            \"updateDate\": \"2021-12-29T15:37:38+01:00\",\n            \"versionId\": \"20000153\",\n            \"warranties\": [\n                {\n                    \"annualNetAmount\": 39.9168,\n                    \"calculationBase\": 0,\n                    \"capital\": 0,\n                    \"code\": \"RC***\",\n                    \"deductibleApplication\": \"CLAIM_VALUE\",\n                    \"deductibleCode\": \"F_FIXE\",\n                    \"deductibleLabel\": \"Franchise fixe\",\n                    \"deductibleType\": \"ABSOLUTE\",\n                    \"deductibleValue\": 122,\n                    \"description\": \"La garantie responsabilité civile vie privée permet de prendre en charge les conséquences pécuniaires en cas de dommages causés à autrui lorsqu'elle engage la responsabilité de l'assuré en cas de survenance d'un accident. Elle couvre les dommages corporels, immatériels et corporels\",\n                    \"freeZones\": {\n                        \"PPSPROD_PATS1_SOUSCRIPTION_DENTAIRE\": {}\n                    },\n                    \"grossAnnualValue\": 0,\n                    \"id\": \"20000507\",\n                    \"index\": \"FFB\",\n                    \"label\": \"Responsabilité civile vie privée\",\n                    \"limitApplication\": \"CLAIM_VALUE\",\n                    \"limitCode\": \"L_FIXE\",\n                    \"limitLabel\": \"Limite fixe\",\n                    \"limitNature\": \"ABSOLUTE\",\n                    \"limitValue\": 50000000,\n                    \"order\": 10,\n                    \"reductionCoefficient\": 0,\n                    \"revisable\": false,\n                    \"specifications\": \"Responsabilité civile vie privée\",\n                    \"subscribed\": true,\n                    \"taxCalculationBaseAmount\": 0,\n                    \"taxCode\": \"TX18M\",\n                    \"taxes\": 7.19\n                },\n                {\n                    \"annualNetAmount\": 71.85024,\n                    \"calculationBase\": 0,\n                    \"capital\": 0,\n                    \"code\": \"INCEN\",\n                    \"deductibleApplication\": \"CLAIM_VALUE\",\n                    \"deductibleCode\": \"F_FIXE\",\n                    \"deductibleLabel\": \"Franchise fixe\",\n                    \"deductibleType\": \"ABSOLUTE\",\n                    \"deductibleValue\": 122,\n                    \"description\": \"La garantie incendie couvre les dommages matériels provoqués par un incendie, une explosion, les fumées résultantes des événements précédents ou l'émission soudaine de fumées. Elle couvre également les chocs contre les biens immobiliers garantis par un VTM, et les chutes d'arbres, de constructions voisines, d'avion sur les bien immobiliers garantis\",\n                    \"freeZones\": {\n                        \"PPSPROD_PATS1_SOUSCRIPTION_DENTAIRE\": {}\n                    },\n                    \"grossAnnualValue\": 0,\n                    \"id\": \"20000514\",\n                    \"index\": \"FFB\",\n                    \"label\": \"Incendie\",\n                    \"limitApplication\": \"CLAIM_VALUE\",\n                    \"limitCode\": \"L_COUT_R\",\n                    \"limitLabel\": \"Côut de reconstruction à l'identique\",\n                    \"limitLongLabel\": \"-bDommages mobiliers : 34 890,00 € dont Bijoux et objets de valeur : 12 223,00 €\\r\\n- Dommages immobiliers : coût de reconstruction à l'identique\",\n                    \"limitNature\": \"UNCALCULABLE\",\n                    \"limitValue\": 100,\n                    \"order\": 20,\n                    \"reductionCoefficient\": 0,\n                    \"revisable\": false,\n                    \"specifications\": \"Incendie\",\n                    \"subscribed\": true,\n                    \"taxCalculationBaseAmount\": 0,\n                    \"taxCode\": \"TX30\",\n                    \"taxes\": 21.56\n                },\n                {\n                    \"annualNetAmount\": 87.81696,\n                    \"calculationBase\": 0,\n                    \"capital\": 0,\n                    \"code\": \"VOL**\",\n                    \"deductibleApplication\": \"CLAIM_VALUE\",\n                    \"deductibleCode\": \"F_FIXE\",\n                    \"deductibleLabel\": \"Franchise fixe\",\n                    \"deductibleType\": \"ABSOLUTE\",\n                    \"deductibleValue\": 122,\n                    \"description\": \"La garantie Vol, Vandalisme couvre le vol, la tentative de vol ou l'acte de vandalisme sur les bien assurés commis par des tiers dans les locaux . Elle permet de prendre en charge également les détériorations immobilières et le remplacement des portes et serrures.\",\n                    \"freeZones\": {\n                        \"PPSPROD_PATS1_SOUSCRIPTION_DENTAIRE\": {}\n                    },\n                    \"grossAnnualValue\": 0,\n                    \"id\": \"20000517\",\n                    \"index\": \"FFB\",\n                    \"label\": \"Vol, Vandalisme\",\n                    \"limitApplication\": \"CLAIM_VALUE\",\n                    \"limitCode\": \"L_COUT_R\",\n                    \"limitLabel\": \"Côut de reconstruction à l'identique\",\n                    \"limitLongLabel\": \"-bDommages mobiliers : 34 890,00 € dont Bijoux et objets de valeur : 12 223,00 €\\r\\n- Dommages immobiliers : coût de reconstruction à l'identique\",\n                    \"limitNature\": \"UNCALCULABLE\",\n                    \"limitValue\": 100,\n                    \"order\": 30,\n                    \"reductionCoefficient\": 0,\n                    \"revisable\": false,\n                    \"specifications\": \"Vol, Vandalisme\",\n                    \"subscribed\": true,\n                    \"taxCalculationBaseAmount\": 0,\n                    \"taxCode\": \"TX18M\",\n                    \"taxes\": 15.81\n                },\n                {\n                    \"annualNetAmount\": 100,\n                    \"calculationBase\": 0,\n                    \"capital\": 0,\n                    \"code\": \"DDE**\",\n                    \"deductibleApplication\": \"CLAIM_VALUE\",\n                    \"deductibleCode\": \"F_FIXE\",\n                    \"deductibleLabel\": \"Franchise fixe\",\n                    \"deductibleType\": \"ABSOLUTE\",\n                    \"deductibleValue\": 122,\n                    \"description\": \"La garantie dégâts des eaux couvre les dommages matériels causés par l'eau dans les locaux assurés en cas : \\r\\n- d'infiltrations\\r\\n- de ruptures ou débordement d'appareils à effet d'eau\\r\\n- de fuites accidentelles de canalisations\\r\\n- d'engorgements accidentels des chéneaux et gouttières\",\n                    \"freeZones\": {\n                        \"PPSPROD_PATS1_SOUSCRIPTION_DENTAIRE\": {}\n                    },\n                    \"grossAnnualValue\": 0,\n                    \"id\": \"20000506\",\n                    \"label\": \"Dégât des eaux\",\n                    \"limitApplication\": \"CLAIM_VALUE\",\n                    \"limitCode\": \"L_COUT_R\",\n                    \"limitLabel\": \"Côut de reconstruction à l'identique\",\n                    \"limitLongLabel\": \"-bDommages mobiliers : 34 890,00 € dont Bijoux et objets de valeur : 12 223,00 €\\r\\n- Dommages immobiliers : coût de reconstruction à l'identique\",\n                    \"limitNature\": \"UNCALCULABLE\",\n                    \"limitValue\": 100,\n                    \"order\": 40,\n                    \"reductionCoefficient\": 0,\n                    \"revisable\": false,\n                    \"specifications\": \"Dégât des eaux\",\n                    \"subscribed\": true,\n                    \"taxCalculationBaseAmount\": 0,\n                    \"taxCode\": \"TXMDD\",\n                    \"taxes\": 8\n                },\n                {\n                    \"annualNetAmount\": 34.328448,\n                    \"calculationBase\": 0,\n                    \"capital\": 0,\n                    \"code\": \"TECHN\",\n                    \"deductibleApplication\": \"CLAIM_VALUE\",\n                    \"deductibleCode\": \"F_CATNA\",\n                    \"deductibleLabel\": \"Fixée par arrêté inter ministériel\",\n                    \"deductibleType\": \"NONE\",\n                    \"deductibleValue\": 0,\n                    \"description\": \"Elle couvre les dommages matériels aux biens immobiliers et mobiliers assurés.\\r\\nElle ne peut être mise en jeu qu'après la publication d'un arrêté interministériel Catastrophe Technologique\",\n                    \"freeZones\": {\n                        \"PPSPROD_PATS1_SOUSCRIPTION_DENTAIRE\": {}\n                    },\n                    \"grossAnnualValue\": 0,\n                    \"id\": \"20000512\",\n                    \"label\": \"Catastrophes technologiques\",\n                    \"limitApplication\": \"CLAIM_VALUE\",\n                    \"limitCode\": \"L_COUT_R\",\n                    \"limitLabel\": \"Côut de reconstruction à l'identique\",\n                    \"limitLongLabel\": \"-bDommages mobiliers : 34 890,00 € dont Bijoux et objets de valeur : 12 223,00 €\\r\\n- Dommages immobiliers : coût de reconstruction à l'identique\",\n                    \"limitNature\": \"UNCALCULABLE\",\n                    \"limitValue\": 100,\n                    \"order\": 50,\n                    \"reductionCoefficient\": 0,\n                    \"revisable\": false,\n                    \"specifications\": \"Catastrophes technologiques\",\n                    \"subscribed\": true,\n                    \"taxCalculationBaseAmount\": 0,\n                    \"taxCode\": \"TX18M\",\n                    \"taxes\": 6.18\n                },\n                {\n                    \"annualNetAmount\": 9.580032,\n                    \"calculationBase\": 0,\n                    \"capital\": 0,\n                    \"code\": \"CATNA\",\n                    \"deductibleApplication\": \"CLAIM_VALUE\",\n                    \"deductibleCode\": \"F_CATNA\",\n                    \"deductibleLabel\": \"Fixée par arrêté inter ministériel\",\n                    \"deductibleType\": \"NONE\",\n                    \"deductibleValue\": 0,\n                    \"description\": \"Cette garantie couvre les dommages ayant eu pour cause déterminante l'intensité d'anormale d'un agent naturel lorsque les mesures habituelles elle permet de prendre en charge les dommages matériels directs subis par les biens assurés. \\r\\nElle ne peut être mise en jeu qu'après la publication d'un arrêté interministériel Catastrophe Naturelle\",\n                    \"freeZones\": {\n                        \"PPSPROD_PATS1_SOUSCRIPTION_DENTAIRE\": {}\n                    },\n                    \"grossAnnualValue\": 0,\n                    \"id\": \"20000515\",\n                    \"index\": \"FFB\",\n                    \"label\": \"Catastrophes naturelles\",\n                    \"limitApplication\": \"CLAIM_VALUE\",\n                    \"limitCode\": \"L_COUT_R\",\n                    \"limitLabel\": \"Côut de reconstruction à l'identique\",\n                    \"limitLongLabel\": \"-bDommages mobiliers : 34 890,00 € dont Bijoux et objets de valeur : 12 223,00 €\\r\\n- Dommages immobiliers : coût de reconstruction à l'identique\",\n                    \"limitNature\": \"UNCALCULABLE\",\n                    \"limitValue\": 100,\n                    \"order\": 60,\n                    \"reductionCoefficient\": 0,\n                    \"revisable\": false,\n                    \"specifications\": \"Catastrophes naturelles\",\n                    \"subscribed\": true,\n                    \"taxCalculationBaseAmount\": 0,\n                    \"taxCode\": \"TCN\",\n                    \"taxes\": 1.52\n                },\n                {\n                    \"annualNetAmount\": 0,\n                    \"calculationBase\": 0,\n                    \"capital\": 0,\n                    \"code\": \"CLIM*\",\n                    \"deductibleApplication\": \"CLAIM_VALUE\",\n                    \"deductibleCode\": \"F_FIXE\",\n                    \"deductibleLabel\": \"Franchise fixe\",\n                    \"deductibleType\": \"ABSOLUTE\",\n                    \"deductibleValue\": 380,\n                    \"description\": \"Cette garantie couvre les dommages matériels causés par : \\r\\n- une inondation\\r\\n- une tempête\\r\\n- la grêle\\r\\n- le poids de la neige\",\n                    \"freeZones\": {\n                        \"PPSPROD_PATS1_SOUSCRIPTION_DENTAIRE\": {}\n                    },\n                    \"grossAnnualValue\": 0,\n                    \"id\": \"20000516\",\n                    \"label\": \"Evènement climatique\",\n                    \"limitApplication\": \"CLAIM_VALUE\",\n                    \"limitCode\": \"L_COUT_R\",\n                    \"limitLabel\": \"Côut de reconstruction à l'identique\",\n                    \"limitLongLabel\": \"-bDommages mobiliers : 34 890,00 € dont Bijoux et objets de valeur : 12 223,00 €\\r\\n- Dommages immobiliers : coût de reconstruction à l'identique\",\n                    \"limitNature\": \"UNCALCULABLE\",\n                    \"limitValue\": 100,\n                    \"order\": 70,\n                    \"reductionCoefficient\": 0,\n                    \"revisable\": false,\n                    \"specifications\": \"Evènement climatique\",\n                    \"subscribed\": true,\n                    \"taxCalculationBaseAmount\": 0,\n                    \"taxCode\": \"TX18M\",\n                    \"taxes\": 0\n                },\n                {\n                    \"annualNetAmount\": 39.9168,\n                    \"calculationBase\": 0,\n                    \"capital\": 0,\n                    \"code\": \"PJDR*\",\n                    \"deductibleValue\": 0,\n                    \"description\": \"La garantie protection juridique prend en charge les frais de procédures ou fournit des services, en cas de différend ou de litige opposant l’assuré à un tiers suite à un accident garanti :\\r\\n- la défense pénale de l’assuré mis en cause ;\\r\\n- son recours en vue d’obtenir la réparation du préjudice personnel si l’assuré est victime.\",\n                    \"freeZones\": {\n                        \"PPSPROD_PATS1_SOUSCRIPTION_DENTAIRE\": {}\n                    },\n                    \"grossAnnualValue\": 0,\n                    \"id\": \"20000509\",\n                    \"label\": \"Protection juridique habitation (Défense et recours)\",\n                    \"limitApplication\": \"CLAIM_VALUE\",\n                    \"limitCode\": \"L_FIXE\",\n                    \"limitLabel\": \"Limite fixe\",\n                    \"limitNature\": \"ABSOLUTE\",\n                    \"limitValue\": 8000,\n                    \"order\": 80,\n                    \"reductionCoefficient\": 0,\n                    \"revisable\": false,\n                    \"specifications\": \"Protection juridique habitation (Défense et recours)\",\n                    \"subscribed\": true,\n                    \"taxCalculationBaseAmount\": 0,\n                    \"taxCode\": \"TXPJ\",\n                    \"taxes\": 5.35\n                },\n                {\n                    \"annualNetAmount\": 0,\n                    \"calculationBase\": 0,\n                    \"capital\": 0,\n                    \"code\": \"ASSIS\",\n                    \"deductibleValue\": 0,\n                    \"description\": \"Cette garantie offre aux personnes assurées par le contrat les prestations suivantes : \\r\\n- Envoi de prestataire en vue d'un maintien à domicile\\r\\n- Retour d'urgence à domicile\\r\\n- relogement en cas de logement inhabitable\\r\\n- soutien psychologique\",\n                    \"freeZones\": {\n                        \"PPSPROD_PATS1_SOUSCRIPTION_DENTAIRE\": {}\n                    },\n                    \"grossAnnualValue\": 0,\n                    \"label\": \"Assistance\",\n                    \"limitValue\": 0,\n                    \"order\": 90,\n                    \"reductionCoefficient\": 0,\n                    \"revisable\": false,\n                    \"specifications\": \"Assistance\",\n                    \"subscribed\": false,\n                    \"taxCalculationBaseAmount\": 0,\n                    \"taxCode\": \"TX18M\",\n                    \"taxes\": 0\n                },\n                {\n                    \"annualNetAmount\": 44,\n                    \"calculationBase\": 0,\n                    \"capital\": 0,\n                    \"code\": \"BDG**\",\n                    \"deductibleApplication\": \"CLAIM_VALUE\",\n                    \"deductibleCode\": \"F_FIXE\",\n                    \"deductibleLabel\": \"Franchise fixe\",\n                    \"deductibleType\": \"ABSOLUTE\",\n                    \"deductibleValue\": 122,\n                    \"description\": \"Cette garantie couvre le bris accidentel des parties vitrées fixées sur ou dans les locaux assurés. Elle permet de prendre en charge les frais de miroiterie et les frais de pose des parties vitrées.\",\n                    \"freeZones\": {\n                        \"PPSPROD_PATS1_SOUSCRIPTION_DENTAIRE\": {}\n                    },\n                    \"grossAnnualValue\": 0,\n                    \"id\": \"20000508\",\n                    \"index\": \"FFB\",\n                    \"label\": \"Bris de glace\",\n                    \"limitApplication\": \"CLAIM_VALUE\",\n                    \"limitCode\": \"L_FIXE\",\n                    \"limitLabel\": \"Limite fixe\",\n                    \"limitNature\": \"ABSOLUTE\",\n                    \"limitValue\": 11000,\n                    \"order\": 90,\n                    \"reductionCoefficient\": 0,\n                    \"revisable\": false,\n                    \"specifications\": \"Bris de glace\",\n                    \"subscribed\": true,\n                    \"taxCalculationBaseAmount\": 0,\n                    \"taxCode\": \"TX18M\",\n                    \"taxes\": 7.92\n                },\n                {\n                    \"annualNetAmount\": 41.513472,\n                    \"calculationBase\": 0,\n                    \"capital\": 0,\n                    \"code\": \"ELEC*\",\n                    \"deductibleApplication\": \"CLAIM_VALUE\",\n                    \"deductibleCode\": \"F_FIXE\",\n                    \"deductibleLabel\": \"Franchise fixe\",\n                    \"deductibleType\": \"ABSOLUTE\",\n                    \"deductibleValue\": 122,\n                    \"description\": \"Cette garantie dommages électriques prend en charge les dommages matériels consécutifs à :\\r\\n- la foudre\\r\\n- mauvais fonctionnement d'un appareil électrique, surtension ou rupture de tension du réseau électrique\",\n                    \"freeZones\": {\n                        \"PPSPROD_PATS1_SOUSCRIPTION_DENTAIRE\": {}\n                    },\n                    \"grossAnnualValue\": 0,\n                    \"id\": \"20000511\",\n                    \"label\": \"Dommages électriques\",\n                    \"limitApplication\": \"CLAIM_VALUE\",\n                    \"limitCode\": \"L_COUT_R\",\n                    \"limitLabel\": \"Côut de reconstruction à l'identique\",\n                    \"limitLongLabel\": \"-bDommages mobiliers : 34 890,00 € dont Bijoux et objets de valeur : 12 223,00 €\\r\\n- Dommages immobiliers : coût de reconstruction à l'identique\",\n                    \"limitNature\": \"UNCALCULABLE\",\n                    \"limitValue\": 100,\n                    \"order\": 100,\n                    \"reductionCoefficient\": 0,\n                    \"revisable\": false,\n                    \"specifications\": \"Dommages électriques\",\n                    \"subscribed\": true,\n                    \"taxCalculationBaseAmount\": 0,\n                    \"taxCode\": \"TX18M\",\n                    \"taxes\": 7.47\n                },\n                {\n                    \"annualNetAmount\": 0,\n                    \"calculationBase\": 0,\n                    \"capital\": 0,\n                    \"code\": \"RCMAT\",\n                    \"deductibleValue\": 0,\n                    \"freeZones\": {\n                        \"PPSPROD_PATS1_SOUSCRIPTION_DENTAIRE\": {}\n                    },\n                    \"grossAnnualValue\": 0,\n                    \"id\": \"20000510\",\n                    \"label\": \"Responsabilité civile Matériel\",\n                    \"limitValue\": 0,\n                    \"mainWarrantyCode\": \"RC***\",\n                    \"order\": 130,\n                    \"reductionCoefficient\": 0,\n                    \"revisable\": false,\n                    \"specifications\": \"Responsabilité civile Matériel\",\n                    \"subscribed\": true,\n                    \"taxCalculationBaseAmount\": 0,\n                    \"taxes\": 0\n                },\n                {\n                    \"annualNetAmount\": 0,\n                    \"calculationBase\": 0,\n                    \"capital\": 0,\n                    \"code\": \"RCCOR\",\n                    \"deductibleValue\": 0,\n                    \"freeZones\": {\n                        \"PPSPROD_PATS1_SOUSCRIPTION_DENTAIRE\": {}\n                    },\n                    \"grossAnnualValue\": 0,\n                    \"id\": \"20000513\",\n                    \"label\": \"Responsabilité civile Corporel\",\n                    \"limitValue\": 0,\n                    \"mainWarrantyCode\": \"RC***\",\n                    \"order\": 140,\n                    \"reductionCoefficient\": 0,\n                    \"revisable\": false,\n                    \"specifications\": \"Responsabilité civile Corporel\",\n                    \"subscribed\": true,\n                    \"taxCalculationBaseAmount\": 0,\n                    \"taxes\": 0\n                },\n                {\n                    \"annualNetAmount\": 0,\n                    \"calculationBase\": 0,\n                    \"capital\": 0,\n                    \"code\": \"ATT**\",\n                    \"deductibleValue\": 0,\n                    \"description\": \"La garantie Attentat et acte de terrorisme couvre les dommages matériels et immatériels consécutifs en cas d'incendie, explosion ou bris de glace dus à un acte de terrorisme ou un attentat.\",\n                    \"freeZones\": {\n                        \"PPSPROD_PATS1_SOUSCRIPTION_DENTAIRE\": {}\n                    },\n                    \"grossAnnualValue\": 0,\n                    \"label\": \"Attentat et acte de terrorisme\",\n                    \"limitValue\": 0,\n                    \"order\": 150,\n                    \"reductionCoefficient\": 0,\n                    \"revisable\": false,\n                    \"specifications\": \"Attentat et acte de terrorisme\",\n                    \"subscribed\": false,\n                    \"taxCalculationBaseAmount\": 0,\n                    \"taxCode\": \"TX18M\",\n                    \"taxes\": 0\n                }\n            ],\n            \"warrantyBundleCodes\": [\n                \"CONFORT\"\n            ],\n            \"withoutEffect\": false\n        },\n        \"status\": {\n            \"code\": \"CONTRACT\",\n            \"creationDate\": \"2021-12-29\",\n            \"earliestDate\": \"2021-12-29\",\n            \"effectiveDate\": \"2021-12-29\",\n            \"effectiveTime\": \"2021-12-29\",\n            \"indexDate\": \"2021-12-29\",\n            \"lastDeadlineDate\": \"2021-12-29\",\n            \"mainDueDate\": \"1201\",\n            \"nextDueDate\": \"2022-12-01\",\n            \"nextDueDateCode\": \"2212\",\n            \"nextMainDueDate\": \"2022-12-01\",\n            \"originalContractEffectiveDate\": \"2021-12-29\",\n            \"quotationPriceValidityDate\": \"2022-01-28\",\n            \"startDate\": \"2021-12-29\",\n            \"subcode\": \"12\",\n            \"sublabel\": \"Contrat en attente de pièces\",\n            \"termBlocked\": false,\n            \"updateDate\": \"2021-12-29\"\n        },\n        \"version\": {\n            \"id\": \"20000058\",\n            \"label\": \"Affaire nouvelle\",\n            \"operationDate\": \"2021-12-29\",\n            \"userLogin\": \"boris.grishenko\",\n            \"userName\": \"GRISHENKO BORIS\",\n            \"valueDate\": \"2021-12-29\"\n        }\n    },\n    \"links\": [\n        {\n            \"actions\": [\n                {\n                    \"description\": \"Load contract\",\n                    \"method\": \"GET\",\n                    \"name\": \"load\"\n                }\n            ],\n            \"href\": \"http://localhost:8080/T9-Assurance/rest/misc/contracts/20000058\",\n            \"rel\": \"self\"\n        },\n        {\n            \"actions\": [\n                {\n                    \"description\": \"Load customer\",\n                    \"method\": \"GET\",\n                    \"name\": \"load\"\n                }\n            ],\n            \"href\": \"http://localhost:8080/T9-Assurance/rest/customers/20000051\",\n            \"rel\": \"Load customer\"\n        },\n        {\n            \"actions\": [\n                {\n                    \"description\": \"List documents\",\n                    \"method\": \"GET\",\n                    \"name\": \"list\"\n                }\n            ],\n            \"href\": \"http://localhost:8080/T9-Assurance/rest/contracts/20000058/documents\",\n            \"rel\": \"List documents\"\n        },\n        {\n            \"actions\": [\n                {\n                    \"description\": \"List premiums\",\n                    \"method\": \"GET\",\n                    \"name\": \"list\"\n                }\n            ],\n            \"href\": \"http://localhost:8080/T9-Assurance/rest/contracts/20000058/premiums\",\n            \"rel\": \"List premiums\"\n        }\n    ],\n    \"status\": \"SUCCESS\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Ouverture",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"let jsonData = pm.response.json();\r",
+									"\r",
+									"//Tests de performance\r",
+									"if (pm.environment.get(\"executePerformanceTests\") == 'true'){\r",
+									"\r",
+									"    pm.test(\"Response time is less than 4000ms\", function () {\r",
+									"        pm.expect(pm.response.responseTime).to.be.below(4000);\r",
+									"    });\r",
+									"}\r",
+									"\r",
+									"//get ID\r",
+									"pm.collectionVariables.set(\"DDEClaimsNumber\", jsonData.data.number);\r",
+									"pm.collectionVariables.set(\"DDEClaimsId\", jsonData.data.id);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.info(this.request.name);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"comments\": \"{{$randomPhrase}}\",\r\n    \"contractId\": {{contratId}},\r\n    \"damages\": {\r\n        \"aggravatingCircumstance\": {{$randomBoolean}}\r\n    },\r\n    \"status\": {\r\n        \"managementDate\": \"{{currentDate}}\",\r\n        \"occurrenceDate\": \"{{currentDate}}\"\r\n    },\r\n    \"riskId\": {{risqueId}},\r\n    \"natureCode\": \"{{Accident_Domestique_Nature}}\",\r\n    \"origin\": \"{{origin}}\",\r\n    \"reference\": \"{{$randomInt}}\",\r\n    \"summary\": \"{{$randomPhrase}}\",\r\n    \"subfolders\": [\r\n        {\r\n            \"natureCode\": \"{{Accident_Domestique_Nature_Sous_Dossier}}\"\r\n        }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/claims",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"claims"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "201 CREATED",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"comments\": \"{{$randomPhrase}}\",\r\n    \"contractId\": {{contratMRHId}},\r\n    \"damages\": {\r\n        \"aggravatingCircumstance\": {{$randomBoolean}}\r\n    },\r\n    \"status\": {\r\n        \"code\":\"PSTTSEEC0000\",\r\n        \"managementDate\": \"{{dateDuJour}}\",\r\n        \"occurrenceDate\": \"{{dateDuJour}}\"\r\n    },\r\n    \"riskId\": {{risqueMRHId}},\r\n    \"natureCode\": \"{{Nature_Sinistre_DDE}}\",\r\n    \"origin\": \"{{$randomUrl}}\",\r\n    \"reference\": \"{{$randomInt}}\",\r\n    \"subnatureCode\": \"{{Sous_Nature_Sinistre_DDE}}\",\r\n    \"summary\": \"{{$randomPhrase}}\",\r\n    \"freeZones\": {\r\n        \"B2C_CLAIM_HOUR\": {\r\n            \"type\": \"DATE\",\r\n            \"value\": \"{{dateDuJour}}\"\r\n        },\r\n        \"B2C_DDE_OTHER\": {\r\n            \"type\": \"BOOLEAN\",\r\n            \"value\": {{$randomBoolean}}\r\n        },\r\n        \"B2C_DDE_BEDROOM\": {\r\n            \"type\": \"BOOLEAN\",\r\n            \"value\": {{$randomBoolean}}\r\n        },\r\n        \"B2C_DDE_KITCHEN\": {\r\n            \"type\": \"BOOLEAN\",\r\n            \"value\": {{$randomBoolean}}\r\n        },\r\n        \"B2C_DDE_BATHROOM\": {\r\n            \"type\": \"BOOLEAN\",\r\n            \"value\": {{$randomBoolean}}\r\n        },\r\n        \"B2C_DDE_ROOM\": {\r\n            \"type\": \"BOOLEAN\",\r\n            \"value\": {{$randomBoolean}}\r\n        },\r\n        \"B2C_DDE_TOILET\": {\r\n            \"type\": \"BOOLEAN\",\r\n            \"value\": {{$randomBoolean}}\r\n        }\r\n    },\r\n    \"subfolders\": [\r\n        {\r\n            \"natureCode\": \"{{Nature_Sous_Dossier_DDE}}\",\r\n            \"party\": {\r\n                \"roleCode\": \"ASSUR\"\r\n            }\r\n        },\r\n        {\r\n            \"natureCode\": \"{{Nature_Sous_Dossier_DDE}}\",\r\n            \"party\": {\r\n                \"person\": {\r\n                    \"familyName\": \"{{$randomLastName}}\",\r\n                    \"firstName\": \"{{$randomFirstName}}\"\r\n                },\r\n                \"communication\": {\r\n                    \"cellphone\": \"{{$randomPhoneNumber}}\",\r\n                    \"email\": \"{{$randomEmail}}\"\r\n                },\r\n                \"roleCode\": \"ADVERSE\"\r\n            }\r\n        }\r\n    ]\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/claims",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"claims"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 29 Dec 2021 16:07:11 GMT"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=20"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Server",
+									"value": ""
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"code\": 200,\n    \"data\": {\n        \"address\": {},\n        \"comments\": \"bypassing the alarm won't do anything, we need to reboot the optical SAS microchip!\",\n        \"contractId\": \"1003578\",\n        \"contractNumber\": \"PMID1-C-00117\",\n        \"damages\": {\n            \"aggravatingCircumstance\": true,\n            \"bodily\": false,\n            \"immaterial\": true,\n            \"material\": false\n        },\n        \"freeZones\": {\n            \"PPSIARD_SMRH_DDE_SINSITRE_ASSUREUR_GESTIONNAIRE\": {},\n            \"PPSIARD_SMRH_DDE_CONSTAT_CAUSE_Q15\": {},\n            \"PPSIARD_SMRH_DDE_CONSTAT_CAUSE_Q04\": {},\n            \"PPSIARD_SMRH_DDE_CONSTAT_CAUSE_Q03\": {},\n            \"PPSIARD_SMRH_DDE_CONSTAT_CAUSE_Q14\": {},\n            \"PPSIARD_SMRH_DDE_CONSTAT_CAUSE_Q02\": {},\n            \"PPSIARD_SMRH_DDE_CONSTAT_CAUSE_Q01\": {},\n            \"PPSIARD_SMRH_DDE_CONSTAT_CAUSE_Q19\": {},\n            \"PPSIARD_SMRH_DDE_CONSTAT_CAUSE_Q18\": {},\n            \"PPSIARD_SMRH_DDE_CONSTAT_CAUSE_Q17\": {},\n            \"PPSIARD_SMRH_DDE_CONSTAT_CAUSE_Q05\": {},\n            \"PPSIARD_SMRH_DDE_CONSTAT_CAUSE_Q16\": {},\n            \"PPSIARD_SMRH_DDE_CONSTAT_CAUSE_FILLER01\": {},\n            \"PPSIARD_SMRH_DDE_CONSTAT_CAUSE_FILLER02\": {},\n            \"PPSIARD_SMRH_DDE_CONSTAT_CAUSE_Q17_2\": {},\n            \"PPSIARD_SMRH_DDE_CONSTAT_CAUSE_Q05_0\": {}\n        },\n        \"id\": \"20000023\",\n        \"management\": {\n            \"updateUserId\": \"1000145\",\n            \"updateUserName\": \"GRISHENKO BORIS\"\n        },\n        \"natureCode\": \"MRHDDE\",\n        \"natureLabel\": \"Dégâts des eaux \",\n        \"number\": \"MRH21-00179\",\n        \"origin\": \"http://monica.net\",\n        \"reference\": \"768\",\n        \"responsibility\": 100,\n        \"riskId\": \"1006089\",\n        \"status\": {\n            \"code\": \"PSTTSEEC0000\",\n            \"creationDate\": \"2021-12-29T17:07:06+01:00\",\n            \"declarationDate\": \"2021-12-29\",\n            \"label\": \"Déclaration en cours\",\n            \"managementDate\": \"2021-12-29\",\n            \"occurrenceDate\": \"2021-12-29\",\n            \"openingDate\": \"2021-12-29\"\n        },\n        \"subfolders\": [\n            {\n                \"freeZones\": {\n                    \"PPSIARD_SOCLE_SINSITRE_CORPO_DT_QC_DECEDE_AVMODIF\": {},\n                    \"PPSIARD_SMRH_AUCUN_DOMMAGE\": {},\n                    \"PPSIARD_SMRH_DDE_ASSURE_LOGEMENT_NOM_PROPRIO\": {},\n                    \"PPSIARD_SMRH_DDE_VALEUR_REELLE\": {\n                        \"type\": \"NUMERIC\",\n                        \"value\": 0\n                    },\n                    \"PPSIARD_SOCLE_SINSITRE_CORPO_DT_CMI_AVMODIF\": {},\n                    \"PPSIARD_SMRH_DDE_DOMMAGE_IMMOBILIER_DESC\": {},\n                    \"PPSIARD_SMRH_DDE_FRAIS_AFFERANT_BOOL\": {},\n                    \"PPSIARD_SMRH_DDE_ASSURE_LOGEMENT_BAIL_RESILIATION\": {},\n                    \"PPSIARD_SMRH_DDE_DOMMAGE_CONTENU_DESC\": {},\n                    \"PPSIARD_SMRH_DDE_SINSITRE_GRAVE_BOOL\": {},\n                    \"PPSIARD_SMRH_DDE_VETUSTE\": {},\n                    \"PPSIARD_SOCLE_SINSITRE_CORPO_DT_QC_BLESSE_AVMODIF\": {},\n                    \"PPSIARD_SMRH_DDE_ASSURE_LOGEMENT_TYPE_LOGEMENT\": {},\n                    \"PPSIARD_SMRH_DDE_ASSURE_LOGEMENT_TYPE_RESIDENCE\": {},\n                    \"PPSIARD_SMRH_DDE_DOMMAGE_IMMOBILIER_BOOL\": {},\n                    \"PPSIARD_SMRH_DDE_ASSURE_LOGEMENT_STATUT_ASSURE\": {},\n                    \"PPSIARD_SMRH_DDE_DOMMAGE_CHIFFRAGE_BOOL\": {},\n                    \"PPSIARD_SMRH_DDE_DOMMAGE_CONTENU_BOOL\": {},\n                    \"PPSIARD_SMRH_DDE_FRAIS_AFFERANT_DESC\": {},\n                    \"PPSIARD_SMRH_DDE_ASSURE_LOGEMENT_DOMMAGE_SUBI\": {},\n                    \"PPSIARD_SMRH_DDE_ASSURE_LOGEMENT_LOC_MEUBLEE\": {},\n                    \"PPSIARD_SMRH_DDE_ASSURE_LOGEMENT_USAGE\": {},\n                    \"PPSIARD_SMRH_DDE_VALEUR_RECONSTRUCTION\": {},\n                    \"PPSIARD_SMRH_DDE_DOMTIERS_SITUATION_TIERS\": {},\n                    \"PPSIARD_SOCLE_SINISTRE_SSDOSSIER_ZL_IS_AVEC_TEMOIN\": {}\n                },\n                \"id\": \"20000020\",\n                \"natureCode\": \"MDIM\",\n                \"natureLabel\": \"Dommages immatériels - MRH\",\n                \"number\": \"SDM00211\",\n                \"party\": {\n                    \"communication\": {\n                        \"cellphone\": \"03-80-97-01-82\",\n                        \"email\": \"lino.roux@example.com\"\n                    },\n                    \"person\": {\n                        \"birthDate\": \"1965-03-16\",\n                        \"completeName\": \"ROUX LINO\",\n                        \"creationDate\": \"2021-08-09T09:40:35+02:00\",\n                        \"familyName\": \"ROUX\",\n                        \"firstName\": \"LINO\",\n                        \"freeZones\": {},\n                        \"id\": \"1010034\",\n                        \"lastUpdateDate\": \"2021-08-09T09:40:48+02:00\"\n                    },\n                    \"roleCode\": \"ASSUR\",\n                    \"roleLabel\": \"Assuré\"\n                }\n            },\n            {\n                \"freeZones\": {\n                    \"PPSIARD_SOCLE_SINSITRE_CORPO_DT_QC_DECEDE_AVMODIF\": {},\n                    \"PPSIARD_SMRH_AUCUN_DOMMAGE\": {},\n                    \"PPSIARD_SMRH_DDE_ASSURE_LOGEMENT_NOM_PROPRIO\": {},\n                    \"PPSIARD_SMRH_DDE_VALEUR_REELLE\": {\n                        \"type\": \"NUMERIC\",\n                        \"value\": 0\n                    },\n                    \"PPSIARD_SOCLE_SINSITRE_CORPO_DT_CMI_AVMODIF\": {},\n                    \"PPSIARD_SMRH_DDE_DOMMAGE_IMMOBILIER_DESC\": {},\n                    \"PPSIARD_SMRH_DDE_FRAIS_AFFERANT_BOOL\": {},\n                    \"PPSIARD_SMRH_DDE_ASSURE_LOGEMENT_BAIL_RESILIATION\": {},\n                    \"PPSIARD_SMRH_DDE_DOMMAGE_CONTENU_DESC\": {},\n                    \"PPSIARD_SMRH_DDE_SINSITRE_GRAVE_BOOL\": {},\n                    \"PPSIARD_SMRH_DDE_VETUSTE\": {},\n                    \"PPSIARD_SOCLE_SINSITRE_CORPO_DT_QC_BLESSE_AVMODIF\": {},\n                    \"PPSIARD_SMRH_DDE_ASSURE_LOGEMENT_TYPE_LOGEMENT\": {},\n                    \"PPSIARD_SMRH_DDE_ASSURE_LOGEMENT_TYPE_RESIDENCE\": {},\n                    \"PPSIARD_SMRH_DDE_DOMMAGE_IMMOBILIER_BOOL\": {},\n                    \"PPSIARD_SMRH_DDE_ASSURE_LOGEMENT_STATUT_ASSURE\": {},\n                    \"PPSIARD_SMRH_DDE_DOMMAGE_CHIFFRAGE_BOOL\": {},\n                    \"PPSIARD_SMRH_DDE_DOMMAGE_CONTENU_BOOL\": {},\n                    \"PPSIARD_SMRH_DDE_FRAIS_AFFERANT_DESC\": {},\n                    \"PPSIARD_SMRH_DDE_ASSURE_LOGEMENT_DOMMAGE_SUBI\": {},\n                    \"PPSIARD_SMRH_DDE_ASSURE_LOGEMENT_LOC_MEUBLEE\": {},\n                    \"PPSIARD_SMRH_DDE_ASSURE_LOGEMENT_USAGE\": {},\n                    \"PPSIARD_SMRH_DDE_VALEUR_RECONSTRUCTION\": {},\n                    \"PPSIARD_SMRH_DDE_DOMTIERS_SITUATION_TIERS\": {},\n                    \"PPSIARD_SOCLE_SINISTRE_SSDOSSIER_ZL_IS_AVEC_TEMOIN\": {}\n                },\n                \"id\": \"20000021\",\n                \"natureCode\": \"MDIM\",\n                \"natureLabel\": \"Dommages immatériels - MRH\",\n                \"number\": \"SDM00212\",\n                \"party\": {\n                    \"communication\": {\n                        \"cellphone\": \"987-717-0651\",\n                        \"email\": \"Loy_Glover@hotmail.com\"\n                    },\n                    \"person\": {\n                        \"completeName\": \"SCHOEN ELISSA\",\n                        \"creationDate\": \"2021-12-29T17:07:08+01:00\",\n                        \"familyName\": \"SCHOEN\",\n                        \"firstName\": \"ELISSA\",\n                        \"freeZones\": {},\n                        \"id\": \"20000182\",\n                        \"lastUpdateDate\": \"2021-12-29T17:07:08+01:00\"\n                    },\n                    \"roleCode\": \"ADVERSE\",\n                    \"roleLabel\": \"Tiers adverse\"\n                }\n            }\n        ],\n        \"subnatureCode\": \"DDE04\",\n        \"subnatureLabel\": \"Infiltrations\",\n        \"summary\": \"You can't connect the port without transmitting the digital EXE system!\"\n    },\n    \"status\": \"SUCCESS\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Chargement",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"const jsonData = pm.response.json();\r",
+									"\r",
+									"//Tests de performance\r",
+									"if (pm.environment.get(\"executePerformanceTests\") == 'true'){\r",
+									"\r",
+									"    pm.test(\"Response time is less than 1500ms\", function () {\r",
+									"        pm.expect(pm.response.responseTime).to.be.below(1500);\r",
+									"    });\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.info(this.request.name);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"comments\": \"Sinistre ouvert par API- comments\",\r\n  \"contractId\":  {{devisMRHId}},\r\n  \"damages\": {\r\n    \"aggravatingCircumstance\": false\r\n    },\r\n  \"natureCode\": \"MRHDDE\",\r\n  \"origin\": \" API \",\r\n  \"reference\": \"API - 0001\",\r\n  \"subnatureCode\": \"DDE01\",\r\n  \"summary\": \"Sinistre ouvert par API -summary \"\r\n}\r\n   \r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/claims/:id",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"claims",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{DDEClaimsId}}"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"comments\": \"Sinistre ouvert par API- comments\",\r\n  \"contractId\":  {{devisMRHId}},\r\n  \"damages\": {\r\n    \"aggravatingCircumstance\": false\r\n    },\r\n  \"natureCode\": \"MRHDDE\",\r\n  \"origin\": \" API \",\r\n  \"reference\": \"API - 0001\",\r\n  \"subnatureCode\": \"DDE01\",\r\n  \"summary\": \"Sinistre ouvert par API -summary \"\r\n}\r\n   \r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/claims/:id",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"claims",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{DDEClaimsId}}"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 29 Dec 2021 16:10:15 GMT"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=20"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Server",
+									"value": ""
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"code\": 200,\n    \"data\": {\n        \"address\": {},\n        \"comments\": \"bypassing the alarm won't do anything, we need to reboot the optical SAS microchip!\",\n        \"contractId\": \"1003578\",\n        \"contractNumber\": \"PMID1-C-00117\",\n        \"damages\": {\n            \"aggravatingCircumstance\": true,\n            \"bodily\": false,\n            \"immaterial\": true,\n            \"material\": false\n        },\n        \"freeZones\": {\n            \"PPSIARD_SMRH_DDE_SINSITRE_ASSUREUR_GESTIONNAIRE\": {},\n            \"PPSIARD_SMRH_DDE_CONSTAT_CAUSE_Q15\": {},\n            \"PPSIARD_SMRH_DDE_CONSTAT_CAUSE_Q04\": {},\n            \"PPSIARD_SMRH_DDE_CONSTAT_CAUSE_Q03\": {},\n            \"PPSIARD_SMRH_DDE_CONSTAT_CAUSE_Q14\": {},\n            \"PPSIARD_SMRH_DDE_CONSTAT_CAUSE_Q02\": {},\n            \"PPSIARD_SMRH_DDE_CONSTAT_CAUSE_Q01\": {},\n            \"PPSIARD_SMRH_DDE_CONSTAT_CAUSE_Q19\": {},\n            \"PPSIARD_SMRH_DDE_CONSTAT_CAUSE_Q18\": {},\n            \"PPSIARD_SMRH_DDE_CONSTAT_CAUSE_Q17\": {},\n            \"PPSIARD_SMRH_DDE_CONSTAT_CAUSE_Q05\": {},\n            \"PPSIARD_SMRH_DDE_CONSTAT_CAUSE_Q16\": {},\n            \"PPSIARD_SMRH_DDE_CONSTAT_CAUSE_FILLER01\": {},\n            \"PPSIARD_SMRH_DDE_CONSTAT_CAUSE_FILLER02\": {},\n            \"PPSIARD_SMRH_DDE_CONSTAT_CAUSE_Q17_2\": {},\n            \"PPSIARD_SMRH_DDE_CONSTAT_CAUSE_Q05_0\": {}\n        },\n        \"id\": \"20000023\",\n        \"management\": {\n            \"updateUserId\": \"1000145\",\n            \"updateUserName\": \"GRISHENKO BORIS\"\n        },\n        \"natureCode\": \"MRHDDE\",\n        \"natureLabel\": \"Dégâts des eaux \",\n        \"number\": \"MRH21-00179\",\n        \"origin\": \"http://monica.net\",\n        \"reference\": \"768\",\n        \"responsibility\": 100,\n        \"riskId\": \"1006089\",\n        \"status\": {\n            \"code\": \"PSTTSEEC0000\",\n            \"creationDate\": \"2021-12-29T17:07:06+01:00\",\n            \"declarationDate\": \"2021-12-29\",\n            \"label\": \"Déclaration en cours\",\n            \"managementDate\": \"2021-12-29\",\n            \"occurrenceDate\": \"2021-12-29\",\n            \"openingDate\": \"2021-12-29\"\n        },\n        \"subfolders\": [\n            {\n                \"freeZones\": {\n                    \"PPSIARD_SOCLE_SINSITRE_CORPO_DT_QC_DECEDE_AVMODIF\": {},\n                    \"PPSIARD_SMRH_AUCUN_DOMMAGE\": {},\n                    \"PPSIARD_SMRH_DDE_ASSURE_LOGEMENT_NOM_PROPRIO\": {},\n                    \"PPSIARD_SMRH_DDE_VALEUR_REELLE\": {\n                        \"type\": \"NUMERIC\",\n                        \"value\": 0\n                    },\n                    \"PPSIARD_SOCLE_SINSITRE_CORPO_DT_CMI_AVMODIF\": {},\n                    \"PPSIARD_SMRH_DDE_DOMMAGE_IMMOBILIER_DESC\": {},\n                    \"PPSIARD_SMRH_DDE_FRAIS_AFFERANT_BOOL\": {},\n                    \"PPSIARD_SMRH_DDE_ASSURE_LOGEMENT_BAIL_RESILIATION\": {},\n                    \"PPSIARD_SMRH_DDE_DOMMAGE_CONTENU_DESC\": {},\n                    \"PPSIARD_SMRH_DDE_SINSITRE_GRAVE_BOOL\": {},\n                    \"PPSIARD_SMRH_DDE_VETUSTE\": {},\n                    \"PPSIARD_SOCLE_SINSITRE_CORPO_DT_QC_BLESSE_AVMODIF\": {},\n                    \"PPSIARD_SMRH_DDE_ASSURE_LOGEMENT_TYPE_LOGEMENT\": {},\n                    \"PPSIARD_SMRH_DDE_ASSURE_LOGEMENT_TYPE_RESIDENCE\": {},\n                    \"PPSIARD_SMRH_DDE_DOMMAGE_IMMOBILIER_BOOL\": {},\n                    \"PPSIARD_SMRH_DDE_ASSURE_LOGEMENT_STATUT_ASSURE\": {},\n                    \"PPSIARD_SMRH_DDE_DOMMAGE_CHIFFRAGE_BOOL\": {},\n                    \"PPSIARD_SMRH_DDE_DOMMAGE_CONTENU_BOOL\": {},\n                    \"PPSIARD_SMRH_DDE_FRAIS_AFFERANT_DESC\": {},\n                    \"PPSIARD_SMRH_DDE_ASSURE_LOGEMENT_DOMMAGE_SUBI\": {},\n                    \"PPSIARD_SMRH_DDE_ASSURE_LOGEMENT_LOC_MEUBLEE\": {},\n                    \"PPSIARD_SMRH_DDE_ASSURE_LOGEMENT_USAGE\": {},\n                    \"PPSIARD_SMRH_DDE_VALEUR_RECONSTRUCTION\": {},\n                    \"PPSIARD_SMRH_DDE_DOMTIERS_SITUATION_TIERS\": {},\n                    \"PPSIARD_SOCLE_SINISTRE_SSDOSSIER_ZL_IS_AVEC_TEMOIN\": {}\n                },\n                \"id\": \"20000020\",\n                \"natureCode\": \"MDIM\",\n                \"natureLabel\": \"Dommages immatériels - MRH\",\n                \"number\": \"SDM00211\",\n                \"party\": {\n                    \"communication\": {\n                        \"cellphone\": \"03-80-97-01-82\",\n                        \"email\": \"lino.roux@example.com\"\n                    },\n                    \"person\": {\n                        \"birthDate\": \"1965-03-16\",\n                        \"completeName\": \"ROUX LINO\",\n                        \"creationDate\": \"2021-08-09T09:40:35+02:00\",\n                        \"familyName\": \"ROUX\",\n                        \"firstName\": \"LINO\",\n                        \"freeZones\": {},\n                        \"id\": \"1010034\",\n                        \"lastUpdateDate\": \"2021-08-09T09:40:48+02:00\"\n                    },\n                    \"roleCode\": \"ASSUR\",\n                    \"roleLabel\": \"Assuré\"\n                }\n            },\n            {\n                \"freeZones\": {\n                    \"PPSIARD_SOCLE_SINSITRE_CORPO_DT_QC_DECEDE_AVMODIF\": {},\n                    \"PPSIARD_SMRH_AUCUN_DOMMAGE\": {},\n                    \"PPSIARD_SMRH_DDE_ASSURE_LOGEMENT_NOM_PROPRIO\": {},\n                    \"PPSIARD_SMRH_DDE_VALEUR_REELLE\": {\n                        \"type\": \"NUMERIC\",\n                        \"value\": 0\n                    },\n                    \"PPSIARD_SOCLE_SINSITRE_CORPO_DT_CMI_AVMODIF\": {},\n                    \"PPSIARD_SMRH_DDE_DOMMAGE_IMMOBILIER_DESC\": {},\n                    \"PPSIARD_SMRH_DDE_FRAIS_AFFERANT_BOOL\": {},\n                    \"PPSIARD_SMRH_DDE_ASSURE_LOGEMENT_BAIL_RESILIATION\": {},\n                    \"PPSIARD_SMRH_DDE_DOMMAGE_CONTENU_DESC\": {},\n                    \"PPSIARD_SMRH_DDE_SINSITRE_GRAVE_BOOL\": {},\n                    \"PPSIARD_SMRH_DDE_VETUSTE\": {},\n                    \"PPSIARD_SOCLE_SINSITRE_CORPO_DT_QC_BLESSE_AVMODIF\": {},\n                    \"PPSIARD_SMRH_DDE_ASSURE_LOGEMENT_TYPE_LOGEMENT\": {},\n                    \"PPSIARD_SMRH_DDE_ASSURE_LOGEMENT_TYPE_RESIDENCE\": {},\n                    \"PPSIARD_SMRH_DDE_DOMMAGE_IMMOBILIER_BOOL\": {},\n                    \"PPSIARD_SMRH_DDE_ASSURE_LOGEMENT_STATUT_ASSURE\": {},\n                    \"PPSIARD_SMRH_DDE_DOMMAGE_CHIFFRAGE_BOOL\": {},\n                    \"PPSIARD_SMRH_DDE_DOMMAGE_CONTENU_BOOL\": {},\n                    \"PPSIARD_SMRH_DDE_FRAIS_AFFERANT_DESC\": {},\n                    \"PPSIARD_SMRH_DDE_ASSURE_LOGEMENT_DOMMAGE_SUBI\": {},\n                    \"PPSIARD_SMRH_DDE_ASSURE_LOGEMENT_LOC_MEUBLEE\": {},\n                    \"PPSIARD_SMRH_DDE_ASSURE_LOGEMENT_USAGE\": {},\n                    \"PPSIARD_SMRH_DDE_VALEUR_RECONSTRUCTION\": {},\n                    \"PPSIARD_SMRH_DDE_DOMTIERS_SITUATION_TIERS\": {},\n                    \"PPSIARD_SOCLE_SINISTRE_SSDOSSIER_ZL_IS_AVEC_TEMOIN\": {}\n                },\n                \"id\": \"20000021\",\n                \"natureCode\": \"MDIM\",\n                \"natureLabel\": \"Dommages immatériels - MRH\",\n                \"number\": \"SDM00212\",\n                \"party\": {\n                    \"communication\": {\n                        \"cellphone\": \"987-717-0651\",\n                        \"email\": \"Loy_Glover@hotmail.com\"\n                    },\n                    \"person\": {\n                        \"completeName\": \"SCHOEN ELISSA\",\n                        \"creationDate\": \"2021-12-29T17:07:08+01:00\",\n                        \"familyName\": \"SCHOEN\",\n                        \"firstName\": \"ELISSA\",\n                        \"freeZones\": {},\n                        \"id\": \"20000182\",\n                        \"lastUpdateDate\": \"2021-12-29T17:07:08+01:00\"\n                    },\n                    \"roleCode\": \"ADVERSE\",\n                    \"roleLabel\": \"Tiers adverse\"\n                }\n            }\n        ],\n        \"subnatureCode\": \"DDE04\",\n        \"subnatureLabel\": \"Infiltrations\",\n        \"summary\": \"You can't connect the port without transmitting the digital EXE system!\"\n    },\n    \"status\": \"SUCCESS\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Recherche par numéro",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"const jsonData = pm.response.json();\r",
+									"\r",
+									"//Tests de performance\r",
+									"if (pm.environment.get(\"executePerformanceTests\") == 'true'){\r",
+									"\r",
+									"    pm.test(\"Response time is less than 2000ms\", function () {\r",
+									"        pm.expect(pm.response.responseTime).to.be.below(2000);\r",
+									"    });\r",
+									"}\r",
+									"\r",
+									"pm.test(\"Limit check\", function () {\r",
+									"    pm.expect(jsonData.limit).to.eql(pm.collectionVariables.get(\"defaultLimit\"));\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Offset check\", function () {\r",
+									"    pm.expect(jsonData.offset).to.eql(pm.collectionVariables.get(\"defaultOffset\"));\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Status code name has string\", function () {\r",
+									"    pm.expect(jsonData.status).to.eql(\"SUCCESS\");\r",
+									"});\r",
+									"\r",
+									"let claims = jsonData.data;\r",
+									"\r",
+									"//Set title code\r",
+									"pm.collectionVariables.set(\"claimsDDERecherché\", claims[_.random(0, claims.length-1)]);\r",
+									"\r",
+									"\r",
+									"pm.test(\"Check claims Id\", function () {\r",
+									"    pm.expect(pm.collectionVariables.get(\"claimsDDERecherché\").id).to.eql(pm.collectionVariables.get(\"DDEClaimsId\"));\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.info(this.request.name);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"comments\": \"Sinistre ouvert par API- comments\",\r\n  \"contractId\":  {{devisMRHId}},\r\n  \"damages\": {\r\n    \"aggravatingCircumstance\": false\r\n    },\r\n  \"natureCode\": \"MRHDDE\",\r\n  \"origin\": \" API \",\r\n  \"reference\": \"API - 0001\",\r\n  \"subnatureCode\": \"DDE01\",\r\n  \"summary\": \"Sinistre ouvert par API -summary \"\r\n}\r\n   \r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/claims?number={{DDEClaimsNumber}}&limit={{defaultLimit}}&offset={{defaultOffset}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"claims"
+							],
+							"query": [
+								{
+									"key": "number",
+									"value": "{{DDEClaimsNumber}}"
+								},
+								{
+									"key": "limit",
+									"value": "{{defaultLimit}}"
+								},
+								{
+									"key": "offset",
+									"value": "{{defaultOffset}}"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"comments\": \"Sinistre ouvert par API- comments\",\r\n  \"contractId\":  {{devisMRHId}},\r\n  \"damages\": {\r\n    \"aggravatingCircumstance\": false\r\n    },\r\n  \"natureCode\": \"MRHDDE\",\r\n  \"origin\": \" API \",\r\n  \"reference\": \"API - 0001\",\r\n  \"subnatureCode\": \"DDE01\",\r\n  \"summary\": \"Sinistre ouvert par API -summary \"\r\n}\r\n   \r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/claims?number={{DDEClaimsNumber}}&limit={{defaultLimit}}&offset={{defaultOffset}}",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"claims"
+									],
+									"query": [
+										{
+											"key": "number",
+											"value": "{{DDEClaimsNumber}}"
+										},
+										{
+											"key": "limit",
+											"value": "{{defaultLimit}}"
+										},
+										{
+											"key": "offset",
+											"value": "{{defaultOffset}}"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 29 Dec 2021 16:11:59 GMT"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=20"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Server",
+									"value": ""
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"code\": 200,\n    \"data\": [\n        {\n            \"address\": {},\n            \"comments\": \"bypassing the alarm won't do anything, we need to reboot the optical SAS microchip!\",\n            \"contractId\": \"1003578\",\n            \"contractNumber\": \"PMID1-C-00117\",\n            \"damages\": {\n                \"aggravatingCircumstance\": true,\n                \"bodily\": false,\n                \"immaterial\": true,\n                \"material\": false\n            },\n            \"id\": \"20000023\",\n            \"management\": {\n                \"updateUserId\": \"1000145\",\n                \"updateUserName\": \"GRISHENKO BORIS\"\n            },\n            \"natureCode\": \"MRHDDE\",\n            \"natureLabel\": \"Dégâts des eaux \",\n            \"number\": \"MRH21-00179\",\n            \"origin\": \"http://monica.net\",\n            \"reference\": \"768\",\n            \"responsibility\": 100,\n            \"riskId\": \"1006089\",\n            \"status\": {\n                \"code\": \"PSTTSEEC0000\",\n                \"creationDate\": \"2021-12-29T17:07:06+01:00\",\n                \"declarationDate\": \"2021-12-29\",\n                \"label\": \"Déclaration en cours\",\n                \"managementDate\": \"2021-12-29\",\n                \"occurrenceDate\": \"2021-12-29\",\n                \"openingDate\": \"2021-12-29\"\n            },\n            \"subnatureCode\": \"DDE04\",\n            \"subnatureLabel\": \"Infiltrations\",\n            \"summary\": \"You can't connect the port without transmitting the digital EXE system!\"\n        }\n    ],\n    \"limit\": 10,\n    \"offset\": 0,\n    \"resultSize\": 1,\n    \"status\": \"SUCCESS\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Recherche par client",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"const jsonData = pm.response.json();\r",
+									"\r",
+									"//Tests de performance\r",
+									"if (pm.environment.get(\"executePerformanceTests\") == 'true'){\r",
+									"\r",
+									"    pm.test(\"Response time is less than 2000ms\", function () {\r",
+									"        pm.expect(pm.response.responseTime).to.be.below(2000);\r",
+									"    });\r",
+									"}\r",
+									"\r",
+									"pm.test(\"Limit check\", function () {\r",
+									"    pm.expect(jsonData.limit).to.eql(pm.collectionVariables.get(\"defaultLimit\"));\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Offset check\", function () {\r",
+									"    pm.expect(jsonData.offset).to.eql(pm.collectionVariables.get(\"defaultOffset\"));\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Status code name has string\", function () {\r",
+									"    pm.expect(jsonData.status).to.eql(\"SUCCESS\");\r",
+									"});\r",
+									"\r",
+									"let claims = jsonData.data;\r",
+									"\r",
+									"//Set title code\r",
+									"pm.collectionVariables.set(\"claimsDDERecherché\", claims[_.random(0, claims.length-1)]);\r",
+									"\r",
+									"\r",
+									"pm.test(\"Claims id is a string\", function () {\r",
+									"    pm.expect(pm.collectionVariables.get(\"claimsDDERecherché\").id).to.be.a(\"string\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.info(this.request.name);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"comments\": \"Sinistre ouvert par API- comments\",\r\n  \"contractId\":  {{devisMRHId}},\r\n  \"damages\": {\r\n    \"aggravatingCircumstance\": false\r\n    },\r\n  \"natureCode\": \"MRHDDE\",\r\n  \"origin\": \" API \",\r\n  \"reference\": \"API - 0001\",\r\n  \"subnatureCode\": \"DDE01\",\r\n  \"summary\": \"Sinistre ouvert par API -summary \"\r\n}\r\n   \r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/claims?customerId={{customerId}}&limit={{defaultLimit}}&offset={{defaultOffset}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"claims"
+							],
+							"query": [
+								{
+									"key": "customerId",
+									"value": "{{customerId}}"
+								},
+								{
+									"key": "limit",
+									"value": "{{defaultLimit}}"
+								},
+								{
+									"key": "offset",
+									"value": "{{defaultOffset}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Recherche par contrat",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"const jsonData = pm.response.json();\r",
+									"\r",
+									"//Tests de performance\r",
+									"if (pm.environment.get(\"executePerformanceTests\") == 'true'){\r",
+									"\r",
+									"    pm.test(\"Response time is less than 2000ms\", function () {\r",
+									"        pm.expect(pm.response.responseTime).to.be.below(2000);\r",
+									"    });\r",
+									"}\r",
+									"\r",
+									"pm.test(\"Limit check\", function () {\r",
+									"    pm.expect(jsonData.limit).to.eql(pm.collectionVariables.get(\"defaultLimit\"));\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Offset check\", function () {\r",
+									"    pm.expect(jsonData.offset).to.eql(pm.collectionVariables.get(\"defaultOffset\"));\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Status code name has string\", function () {\r",
+									"    pm.expect(jsonData.status).to.eql(\"SUCCESS\");\r",
+									"});\r",
+									"\r",
+									"let claims = jsonData.data;\r",
+									"\r",
+									"//Set title code\r",
+									"pm.collectionVariables.set(\"claimsDDERecherché\", claims[_.random(0, claims.length-1)]);\r",
+									"\r",
+									"\r",
+									"pm.test(\"Claims id is a string\", function () {\r",
+									"    pm.expect(pm.collectionVariables.get(\"claimsDDERecherché\").id).to.be.a(\"string\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.info(this.request.name);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/claims?contractId={{contratId}}&limit={{defaultLimit}}&offset={{defaultOffset}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"claims"
+							],
+							"query": [
+								{
+									"key": "contractId",
+									"value": "{{contratId}}"
+								},
+								{
+									"key": "limit",
+									"value": "{{defaultLimit}}"
+								},
+								{
+									"key": "offset",
+									"value": "{{defaultOffset}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Recherche par date d'occurence",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"const jsonData = pm.response.json();\r",
+									"\r",
+									"//Tests de performance\r",
+									"if (pm.environment.get(\"executePerformanceTests\") == 'true'){\r",
+									"\r",
+									"    pm.test(\"Response time is less than 2000ms\", function () {\r",
+									"        pm.expect(pm.response.responseTime).to.be.below(2000);\r",
+									"    });\r",
+									"}\r",
+									"\r",
+									"pm.test(\"Limit check\", function () {\r",
+									"    pm.expect(jsonData.limit).to.eql(pm.collectionVariables.get(\"defaultLimit\"));\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Offset check\", function () {\r",
+									"    pm.expect(jsonData.offset).to.eql(pm.collectionVariables.get(\"defaultOffset\"));\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Status code name has string\", function () {\r",
+									"    pm.expect(jsonData.status).to.eql(\"SUCCESS\");\r",
+									"});\r",
+									"\r",
+									"let claims = jsonData.data;\r",
+									"\r",
+									"//Set title code\r",
+									"pm.collectionVariables.set(\"claimsDDERecherché\", claims[_.random(0, claims.length-1)]);\r",
+									"\r",
+									"\r",
+									"pm.test(\"Claims id is a string\", function () {\r",
+									"    pm.expect(pm.collectionVariables.get(\"claimsDDERecherché\").id).to.be.a(\"string\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.info(this.request.name);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"comments\": \"Sinistre ouvert par API- comments\",\r\n  \"contractId\":  {{devisMRHId}},\r\n  \"damages\": {\r\n    \"aggravatingCircumstance\": false\r\n    },\r\n  \"natureCode\": \"MRHDDE\",\r\n  \"origin\": \" API \",\r\n  \"reference\": \"API - 0001\",\r\n  \"subnatureCode\": \"DDE01\",\r\n  \"summary\": \"Sinistre ouvert par API -summary \"\r\n}\r\n   \r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/claims?occurenceDateMin={{currentDate}}&occurenceDateMax={{currentDate}}&customerId={{customerId}}&limit={{defaultLimit}}&offset={{defaultOffset}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"claims"
+							],
+							"query": [
+								{
+									"key": "occurenceDateMin",
+									"value": "{{currentDate}}"
+								},
+								{
+									"key": "occurenceDateMax",
+									"value": "{{currentDate}}"
+								},
+								{
+									"key": "customerId",
+									"value": "{{customerId}}"
+								},
+								{
+									"key": "limit",
+									"value": "{{defaultLimit}}"
+								},
+								{
+									"key": "offset",
+									"value": "{{defaultOffset}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Recherche par date de déclaration",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"const jsonData = pm.response.json();\r",
+									"\r",
+									"//Tests de performance\r",
+									"if (pm.environment.get(\"executePerformanceTests\") == 'true'){\r",
+									"\r",
+									"    pm.test(\"Response time is less than 2000ms\", function () {\r",
+									"        pm.expect(pm.response.responseTime).to.be.below(2000);\r",
+									"    });\r",
+									"}\r",
+									"\r",
+									"pm.test(\"Limit check\", function () {\r",
+									"    pm.expect(jsonData.limit).to.eql(pm.collectionVariables.get(\"defaultLimit\"));\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Offset check\", function () {\r",
+									"    pm.expect(jsonData.offset).to.eql(pm.collectionVariables.get(\"defaultOffset\"));\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Status code name has string\", function () {\r",
+									"    pm.expect(jsonData.status).to.eql(\"SUCCESS\");\r",
+									"});\r",
+									"\r",
+									"let claims = jsonData.data;\r",
+									"\r",
+									"//Set title code\r",
+									"pm.collectionVariables.set(\"claimsDDERecherché\", claims[_.random(0, claims.length-1)]);\r",
+									"\r",
+									"\r",
+									"pm.test(\"Claims id is a string\", function () {\r",
+									"    pm.expect(pm.collectionVariables.get(\"claimsDDERecherché\").id).to.be.a(\"string\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.info(this.request.name);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"comments\": \"Sinistre ouvert par API- comments\",\r\n  \"contractId\":  {{devisMRHId}},\r\n  \"damages\": {\r\n    \"aggravatingCircumstance\": false\r\n    },\r\n  \"natureCode\": \"MRHDDE\",\r\n  \"origin\": \" API \",\r\n  \"reference\": \"API - 0001\",\r\n  \"subnatureCode\": \"DDE01\",\r\n  \"summary\": \"Sinistre ouvert par API -summary \"\r\n}\r\n   \r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/claims?occurenceDateMin={{currentDate}}&occurenceDateMax={{currentDate}}&customerId={{customerId}}&limit={{defaultLimit}}&offset={{defaultOffset}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"claims"
+							],
+							"query": [
+								{
+									"key": "occurenceDateMin",
+									"value": "{{currentDate}}"
+								},
+								{
+									"key": "occurenceDateMax",
+									"value": "{{currentDate}}"
+								},
+								{
+									"key": "customerId",
+									"value": "{{customerId}}"
+								},
+								{
+									"key": "limit",
+									"value": "{{defaultLimit}}"
+								},
+								{
+									"key": "offset",
+									"value": "{{defaultOffset}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Recherche par nature de dossier",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"const jsonData = pm.response.json();\r",
+									"\r",
+									"//Tests de performance\r",
+									"if (pm.environment.get(\"executePerformanceTests\") == 'true'){\r",
+									"\r",
+									"    pm.test(\"Response time is less than 2000ms\", function () {\r",
+									"        pm.expect(pm.response.responseTime).to.be.below(2000);\r",
+									"    });\r",
+									"}\r",
+									"\r",
+									"pm.test(\"Limit check\", function () {\r",
+									"    pm.expect(jsonData.limit).to.eql(pm.collectionVariables.get(\"defaultLimit\"));\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Offset check\", function () {\r",
+									"    pm.expect(jsonData.offset).to.eql(pm.collectionVariables.get(\"defaultOffset\"));\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Status code name has string\", function () {\r",
+									"    pm.expect(jsonData.status).to.eql(\"SUCCESS\");\r",
+									"});\r",
+									"\r",
+									"let claims = jsonData.data;\r",
+									"\r",
+									"//Set title code\r",
+									"pm.collectionVariables.set(\"claimsDDERecherché\", claims[_.random(0, claims.length-1)]);\r",
+									"\r",
+									"\r",
+									"pm.test(\"Claims id is a string\", function () {\r",
+									"    pm.expect(pm.collectionVariables.get(\"claimsDDERecherché\").id).to.be.a(\"string\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.info(this.request.name);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"comments\": \"Sinistre ouvert par API- comments\",\r\n  \"contractId\":  {{devisMRHId}},\r\n  \"damages\": {\r\n    \"aggravatingCircumstance\": false\r\n    },\r\n  \"natureCode\": \"MRHDDE\",\r\n  \"origin\": \" API \",\r\n  \"reference\": \"API - 0001\",\r\n  \"subnatureCode\": \"DDE01\",\r\n  \"summary\": \"Sinistre ouvert par API -summary \"\r\n}\r\n   \r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/claims?natureCode={{Nature_Sinistre_DDE}}&customerId={{customerId}}&limit={{defaultLimit}}&offset={{defaultOffset}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"claims"
+							],
+							"query": [
+								{
+									"key": "natureCode",
+									"value": "{{Nature_Sinistre_DDE}}"
+								},
+								{
+									"key": "customerId",
+									"value": "{{customerId}}"
+								},
+								{
+									"key": "limit",
+									"value": "{{defaultLimit}}"
+								},
+								{
+									"key": "offset",
+									"value": "{{defaultOffset}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Recherche par sous nature de dossier",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"//getJson data\r",
+									"const jsonData = pm.response.json();\r",
+									"\r",
+									"//Tests de performance\r",
+									"if (pm.environment.get(\"executePerformanceTests\") == 'true'){\r",
+									"\r",
+									"    pm.test(\"Response time is less than 2000ms\", function () {\r",
+									"        pm.expect(pm.response.responseTime).to.be.below(2000);\r",
+									"    });\r",
+									"}\r",
+									"\r",
+									"pm.test(\"Limit check\", function () {\r",
+									"    pm.expect(jsonData.limit).to.eql(pm.collectionVariables.get(\"defaultLimit\"));\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Offset check\", function () {\r",
+									"    pm.expect(jsonData.offset).to.eql(pm.collectionVariables.get(\"defaultOffset\"));\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Status code name has string\", function () {\r",
+									"    pm.expect(jsonData.status).to.eql(\"SUCCESS\");\r",
+									"});\r",
+									"\r",
+									"let claims = jsonData.data;\r",
+									"\r",
+									"//Set title code\r",
+									"pm.collectionVariables.set(\"claimsDDERecherché\", claims[_.random(0, claims.length-1)]);\r",
+									"\r",
+									"\r",
+									"pm.test(\"Claims id is a string\", function () {\r",
+									"    pm.expect(pm.collectionVariables.get(\"claimsDDERecherché\").id).to.be.a(\"string\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.info(this.request.name);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"comments\": \"Sinistre ouvert par API- comments\",\r\n  \"contractId\":  {{devisMRHId}},\r\n  \"damages\": {\r\n    \"aggravatingCircumstance\": false\r\n    },\r\n  \"natureCode\": \"MRHDDE\",\r\n  \"origin\": \" API \",\r\n  \"reference\": \"API - 0001\",\r\n  \"subnatureCode\": \"DDE01\",\r\n  \"summary\": \"Sinistre ouvert par API -summary \"\r\n}\r\n   \r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/claims?customerId={{customerId}}&limit={{defaultLimit}}&offset={{defaultOffset}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"claims"
+							],
+							"query": [
+								{
+									"key": "subnatureCode",
+									"value": "{{Sous_Nature_Sinistre_DDE}}",
+									"disabled": true
+								},
+								{
+									"key": "customerId",
+									"value": "{{customerId}}"
+								},
+								{
+									"key": "limit",
+									"value": "{{defaultLimit}}"
+								},
+								{
+									"key": "offset",
+									"value": "{{defaultOffset}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"pm.collectionVariables.set('folderName','Sinistre MRH (Dégat des eaux)');"
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Sinistre GAV (Accident domestique)",
+			"item": [],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"pm.collectionVariables.set('folderName','Sinistre MRH (Dégat des eaux)');"
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Connexion et initialisation",
+			"item": [],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Listes globales",
+			"item": [],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"pm.collectionVariables.set('folderName','Listes globales');"
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Sinistre GAV (Accident domestique)",
+			"item": [],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"pm.collectionVariables.set('folderName','Sinistre MRH (Dégat des eaux)');"
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Connexion et initialisation",
+			"item": [],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Listes globales",
+			"item": [],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"pm.collectionVariables.set('folderName','Listes globales');"
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"const moment = require('moment');",
+					"pm.collectionVariables.set(\"currentDate\", moment().format(\"YYYY-MM-DD\"));",
+					"pm.collectionVariables.set(\"1MonthLater\", moment().add(30, 'days').format(\"YYYY-MM-DD\"));",
+					"pm.collectionVariables.set(\"6MonthsLater\", moment().add(180, 'days').format(\"YYYY-MM-DD\"));",
+					"pm.collectionVariables.set(\"1MonthAgo\", moment().add(-1, 'months').format(\"YYYY-MM-DD\"));",
+					"pm.collectionVariables.set(\"2MonthsAgo\", moment().add(-4, 'months').format(\"YYYY-MM-DD\"));",
+					"pm.collectionVariables.set(\"4MonthsAgo\", moment().add(-4, 'months').format(\"YYYY-MM-DD\"));",
+					"pm.collectionVariables.set(\"5MonthsAgo\", moment().add(-5, 'months').format(\"YYYY-MM-DD\"));",
+					"pm.collectionVariables.set(\"6MonthsAgo\", moment().add(-6, 'months').format(\"YYYY-MM-DD\"));",
+					"pm.collectionVariables.set(\"lastYear\", moment().add(-1, 'years').format(\"YYYY-MM-DD\"));",
+					"pm.collectionVariables.set(\"5YearsAgo\", moment().add(-5, 'years').format(\"YYYY-MM-DD\"));",
+					"pm.collectionVariables.set(\"10YearsAgo\", moment().add(-10, 'years').format(\"YYYY-MM-DD\"));",
+					"pm.collectionVariables.set(\"15YearsAgo\", moment().add(-15, 'years').format(\"YYYY-MM-DD\"));",
+					"pm.collectionVariables.set(\"20YearsAgo\", moment().add(-20, 'years').format(\"YYYY-MM-DD\"));",
+					"pm.collectionVariables.set(\"30YearsAgo\", moment().add(-30, 'years').format(\"YYYY-MM-DD\"));",
+					"pm.collectionVariables.set(\"35YearsAgo\", moment().add(-35, 'years').format(\"YYYY-MM-DD\"));",
+					"pm.collectionVariables.set(\"40YearsAgo\", moment().add(-40, 'years').format(\"YYYY-MM-DD\"));",
+					"pm.collectionVariables.set(\"45YearsAgo\", moment().add(-45, 'years').format(\"YYYY-MM-DD\"));",
+					"pm.collectionVariables.set(\"50YearsAgo\", moment().add(-50, 'years').format(\"YYYY-MM-DD\"));",
+					"pm.collectionVariables.set(\"60YearsAgo\", moment().add(-60, 'years').format(\"YYYY-MM-DD\"));",
+					"pm.collectionVariables.set(\"70YearsAgo\", moment().add(-70, 'years').format(\"YYYY-MM-DD\"));",
+					"pm.collectionVariables.set(\"currentDateSearchFormat\", moment().format(\"YYYY/MM/DD\"));",
+					"",
+					"//Date de naissances",
+					"pm.collectionVariables.set(\"birthDate10YearsAgo\", moment().add(-10, 'years').format(\"YYYY-MM-DD\"));",
+					"pm.collectionVariables.set(\"birthDate20YearsAgo\", moment().add(-20, 'years').format(\"YYYY-MM-DD\"));",
+					"pm.collectionVariables.set(\"birthDate30YearsAgo\", moment().add(-30, 'years').format(\"YYYY-MM-DD\"));",
+					"pm.collectionVariables.set(\"birthDate40YearsAgo\", moment().add(-40, 'years').format(\"YYYY-MM-DD\"));",
+					"pm.collectionVariables.set(\"birthDate50YearsAgo\", moment().add(-50, 'years').format(\"YYYY-MM-DD\"));",
+					"pm.collectionVariables.set(\"birthDate60YearsAgo\", moment().add(-60, 'years').format(\"YYYY-MM-DD\"));",
+					"pm.collectionVariables.set(\"birthDate70YearsAgo\", moment().add(-70, 'years').format(\"YYYY-MM-DD\"));",
+					"pm.collectionVariables.set(\"birthDate80YearsAgo\", moment().add(-80, 'years').format(\"YYYY-MM-DD\"));",
+					"",
+					"//Default variables for GET Methods",
+					"pm.collectionVariables.set(\"defaultOffset\", 0);",
+					"pm.collectionVariables.set(\"defaultLimit\", 10);",
+					"pm.collectionVariables.set(\"50_Limit\", 50);",
+					"",
+					"",
+					"//Variables de tests",
+					"pm.collectionVariables.set(\"productCode\", \"PGID1\");",
+					"",
+					"var useId = false;",
+					"if (request.url.includes('/:id')){",
+					"    useId == true;",
+					"}"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"if (request.name != 'Connexion CLEVA' && request.name != 'Connexion Cleva'){",
+					"    if (request.method == 'GET'){",
+					"        pm.test(\"Status code is 200\", function () {",
+					"            pm.response.to.have.status(200);",
+					"        });",
+					"        if (!request.url.includes('/settings/lists')&&!request.url.includes('/me')&&!request.url.includes('/system')&&pm.collectionVariables.get(\"useId\")==false){",
+					"            pm.test(\"Limit is a number\", function () {",
+					"                pm.expect(pm.response.json().limit).to.be.an(\"number\");",
+					"            });",
+					"            pm.test(\"resultSize is a number\", function () {",
+					"                pm.expect(pm.response.json().resultSize).to.be.an(\"number\");",
+					"            });",
+					"            pm.test(\"offset is a number\", function () {",
+					"                pm.expect(pm.response.json().offset).to.be.an(\"number\");",
+					"            });  ",
+					"        }",
+					"    }",
+					"    if (request.method == 'POST'){",
+					"        pm.test(\"Successful POST request\", function () {",
+					"            pm.expect(pm.response.code).to.be.oneOf([200, 201, 202]);",
+					"        });",
+					"    }",
+					"    if (request.method == 'PUT'){",
+					"        pm.test(\"Successful POST request\", function () {",
+					"            pm.expect(pm.response.code).to.be.oneOf([200, 201, 202]);",
+					"        });",
+					"    }",
+					"    if (request.method == 'PATCH'){",
+					"        pm.test(\"Status code is 200\", function () {",
+					"            pm.response.to.have.status(200);",
+					"        });",
+					"    }",
+					"    if (pm.response.code == 200||pm.response.code == 201||pm.response.code == 202){",
+					"        //Content type is json",
+					"        pm.test(\"Content-Type header is application/json\", () => {",
+					"        pm.expect(pm.response.headers.get('Content-Type')).to.eql('application/json');",
+					"        });",
+					"        //getJson data",
+					"        const jsonData = pm.response.json();",
+					"        //Body of response is present by testing length of response",
+					"        pm.test(\"Body is present\", () => {",
+					"            jsonData.length > 1;",
+					"        });",
+					"        //Testing if jsonData is an object",
+					"        pm.test(\"JsonData content\", () => {",
+					"            pm.expect(jsonData).to.be.an(\"object\");",
+					"        });",
+					"    }",
+					"}",
+					"//Styles pour les listes",
+					"if (request.url.includes('/settings/lists')){",
+					"    pm.test(\"Code is a string\", function () {",
+					"        pm.expect(pm.response.json().data.code).to.be.a(\"string\");",
+					"    });/*",
+					"    pm.test(\"description is a string\", function () {",
+					"        pm.expect(pm.response.json().data.description).to.be.a(\"string\");",
+					"    });*/",
+					"    pm.test(\"moreResults is a boolean\", function () {",
+					"        pm.expect(pm.response.json().data.moreResults).to.be.a(\"boolean\");",
+					"    });",
+					"    pm.test(\"title is a string\", function () {",
+					"        pm.expect(pm.response.json().data.title).to.be.a(\"string\");",
+					"    });",
+					"    pm.test(\"type is a string\", function () {",
+					"        pm.expect(pm.response.json().data.type).to.be.a(\"string\");",
+					"    }); ",
+					"    pm.visualizer.set(pm.collectionVariables.get(\"templateListes\"), {",
+					"      response: pm.response.json()",
+					"    });",
+					"}",
+					"",
+					"//Tests de performance",
+					"if (pm.environment.get(\"executePerformanceTests\") == 'true'){",
+					"  if (request.method == 'GET'){",
+					"    //Les listes doivent s'exécuter en moins de 500 ms",
+					"    if (request.url.includes('/settings/lists')){",
+					"        pm.test(\"Response time is less than 500ms\", function () {",
+					"        pm.expect(pm.response.responseTime).to.be.below(500);",
+					"       });",
+					"    }else{",
+					"        //Les recherches doivent s'exécuter en mois de une seconde et demi",
+					"        pm.test(\"Response time is less than 1500ms\", function () {",
+					"        pm.expect(pm.response.responseTime).to.be.below(1500);",
+					"       });",
+					"    }  ",
+					"  }",
+					"  if (request.method == 'POST'){",
+					"       //Les POST doivent s'exécuter en moins de 2 secondes",
+					"      pm.test(\"Response time is less than 2000ms\", function () {",
+					"          pm.expect(pm.response.responseTime).to.be.below(2000);",
+					"      });",
+					"  }",
+					"",
+					"  if (request.method == 'PATCH'){",
+					"      //Les PATCH doivent s'exécuter en moins de 2 secondes",
+					"      pm.test(\"Response time is less than 2000ms\", function () {",
+					"          pm.expect(pm.response.responseTime).to.be.below(2000);",
+					"      });",
+					"  }",
+					"",
+					"  if (request.method == 'PUT'){",
+					"      //Les PUT doivent s'exécuter en moins de 2 secondes",
+					"      pm.test(\"Response time is less than 2000ms\", function () {",
+					"          pm.expect(pm.response.responseTime).to.be.below(2000);",
+					"      });",
+					"  }",
+					"}"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "templateListes",
+			"value": " <style type=\"text/css\">\n        .tftable {font-size:14px;color:#333333;width:100%;border-width: 1px;border-color: #87ceeb;border-collapse: collapse;}\n        .tftable th {font-size:18px;background-color:#87ceeb;border-width: 1px;padding: 8px;border-style: solid;border-color: #87ceeb;text-align:left;}\n        .tftable tr {background-color:#ffffff;}\n        .tftable td {font-size:14px;border-width: 1px;padding: 8px;border-style: solid;border-color: #87ceeb;}\n        .tftable tr:hover {background-color:#e0ffff;}\n    </style>\n    \n    <table class=\"tftable\" border=\"1\">\n        <tr>\n            <th>Code</th>\n            <th>Label</th>\n        </tr>\n        \n        {{#each response.data.values}}\n            <tr id=row_{{@key}} onClick=\"handleClick(this.code)\">\n                <td id={{@key}}>{{code}}</td>\n                <td>{{label}}</td>\n            </tr>\n        {{/each}}\n    </table>"
+		},
+		{
+			"key": "currentDate",
+			"value": ""
+		},
+		{
+			"key": "1MonthLater",
+			"value": ""
+		},
+		{
+			"key": "6MonthsLater",
+			"value": ""
+		},
+		{
+			"key": "1MonthAgo",
+			"value": ""
+		},
+		{
+			"key": "4MonthsAgo",
+			"value": ""
+		},
+		{
+			"key": "5MonthsAgo",
+			"value": ""
+		},
+		{
+			"key": "6MonthsAgo",
+			"value": ""
+		},
+		{
+			"key": "lastYear",
+			"value": ""
+		},
+		{
+			"key": "5YearsAgo",
+			"value": ""
+		},
+		{
+			"key": "10YearsAgo",
+			"value": ""
+		},
+		{
+			"key": "15YearsAgo",
+			"value": ""
+		},
+		{
+			"key": "20YearsAgo",
+			"value": ""
+		},
+		{
+			"key": "30YearsAgo",
+			"value": ""
+		},
+		{
+			"key": "35YearsAgo",
+			"value": ""
+		},
+		{
+			"key": "40YearsAgo",
+			"value": ""
+		},
+		{
+			"key": "45YearsAgo",
+			"value": ""
+		},
+		{
+			"key": "50YearsAgo",
+			"value": ""
+		},
+		{
+			"key": "60YearsAgo",
+			"value": ""
+		},
+		{
+			"key": "70YearsAgo",
+			"value": ""
+		},
+		{
+			"key": "currentDateSearchFormat",
+			"value": ""
+		},
+		{
+			"key": "birthDate10YearsAgo",
+			"value": ""
+		},
+		{
+			"key": "birthDate20YearsAgo",
+			"value": ""
+		},
+		{
+			"key": "birthDate30YearsAgo",
+			"value": ""
+		},
+		{
+			"key": "birthDate40YearsAgo",
+			"value": ""
+		},
+		{
+			"key": "birthDate50YearsAgo",
+			"value": ""
+		},
+		{
+			"key": "birthDate60YearsAgo",
+			"value": ""
+		},
+		{
+			"key": "birthDate70YearsAgo",
+			"value": ""
+		},
+		{
+			"key": "birthDate80YearsAgo",
+			"value": ""
+		},
+		{
+			"key": "defaultOffset",
+			"value": ""
+		},
+		{
+			"key": "defaultLimit",
+			"value": ""
+		},
+		{
+			"key": "50_Limit",
+			"value": ""
+		},
+		{
+			"key": "token",
+			"value": ""
+		},
+		{
+			"key": "folderName",
+			"value": ""
+		},
+		{
+			"key": "productCode",
+			"value": ""
+		},
+		{
+			"key": "personTitles",
+			"value": ""
+		},
+		{
+			"key": "customerTitle",
+			"value": ""
+		},
+		{
+			"key": "contactTitle",
+			"value": ""
+		},
+		{
+			"key": "Nature_Sinistre_DDE",
+			"value": ""
+		},
+		{
+			"key": "Accident_Domestique_Nature",
+			"value": ""
+		},
+		{
+			"key": "Accident_Domestique_Nature_Sous_Dossier",
+			"value": ""
+		},
+		{
+			"key": "PGID1_Assurer_Conjoint",
+			"value": ""
+		},
+		{
+			"key": "origin",
+			"value": ""
+		},
+		{
+			"key": "contratMRHId",
+			"value": ""
+		},
+		{
+			"key": "contratId",
+			"value": ""
+		},
+		{
+			"key": "risqueId",
+			"value": ""
+		},
+		{
+			"key": "customerId",
+			"value": ""
+		},
+		{
+			"key": "brokerId",
+			"value": ""
+		},
+		{
+			"key": "personApporteurId",
+			"value": ""
+		},
+		{
+			"key": "loginApporteur",
+			"value": ""
+		},
+		{
+			"key": "profil",
+			"value": ""
+		},
+		{
+			"key": "clevaVersion",
+			"value": ""
+		},
+		{
+			"key": "DDEClaimsNumber",
+			"value": ""
+		},
+		{
+			"key": "DDEClaimsId",
+			"value": ""
+		},
+		{
+			"key": "claimsDDERecherché",
+			"value": ""
+		},
+		{
+			"key": "dateDuJour",
+			"value": ""
+		},
+		{
+			"key": "dateDuJour_Plus_1_Mois",
+			"value": ""
+		},
+		{
+			"key": "dateDuJour_Plus_6_Mois",
+			"value": ""
+		},
+		{
+			"key": "dateDuJour_Moins_1_Mois",
+			"value": ""
+		},
+		{
+			"key": "dateDuJour_Moins_6_Mois",
+			"value": ""
+		},
+		{
+			"key": "dateDuJourFormatRecherche",
+			"value": ""
+		},
+		{
+			"key": "customerGAVCivilite",
+			"value": ""
+		},
+		{
+			"key": "nombreEnfants",
+			"value": ""
+		},
+		{
+			"key": "Usage_Adresse_Principal",
+			"value": ""
+		},
+		{
+			"key": "customerAdr",
+			"value": ""
+		},
+		{
+			"key": "customerAdrZipCode",
+			"value": ""
+		},
+		{
+			"key": "customerAdrCity",
+			"value": ""
+		},
+		{
+			"key": "customerAdressCountryCode",
+			"value": ""
+		},
+		{
+			"key": "customerDNaissance",
+			"value": ""
+		},
+		{
+			"key": "customerGAVPhoneNumber",
+			"value": ""
+		},
+		{
+			"key": "streetAddress",
+			"value": ""
+		},
+		{
+			"key": "customerGAVPersonFamilyName",
+			"value": ""
+		},
+		{
+			"key": "customerGAVPersonFirstName",
+			"value": ""
+		},
+		{
+			"key": "customerGAVEmail",
+			"value": ""
+		},
+		{
+			"key": "customerAdressLine1",
+			"value": ""
+		},
+		{
+			"key": "customerAdressLine2",
+			"value": ""
+		},
+		{
+			"key": "customerAdressLine3",
+			"value": ""
+		},
+		{
+			"key": "customerAdressLatitude",
+			"value": ""
+		},
+		{
+			"key": "customerAdressLongitude",
+			"value": ""
+		},
+		{
+			"key": "customerGAVId",
+			"value": ""
+		},
+		{
+			"key": "customerGAVPersonId",
+			"value": ""
+		},
+		{
+			"key": "customerGAVPersonName",
+			"value": ""
+		},
+		{
+			"key": "customerGAVPersonBirthDate",
+			"value": ""
+		},
+		{
+			"key": "customerGAVPersonZipCode",
+			"value": ""
+		},
+		{
+			"key": "customerGender",
+			"value": ""
+		},
+		{
+			"key": "customerAdressNumber",
+			"value": ""
+		},
+		{
+			"key": "customerAdressStreetName",
+			"value": ""
+		},
+		{
+			"key": "varianteExclusiveGAV",
+			"value": ""
+		},
+		{
+			"key": "varianteOptionGAV",
+			"value": ""
+		},
+		{
+			"key": "devisGAVId",
+			"value": ""
+		},
+		{
+			"key": "devisGAVNumber",
+			"value": ""
+		},
+		{
+			"key": "intervenantConjointPersonId",
+			"value": ""
+		},
+		{
+			"key": "intervenantEnfantPersonId",
+			"value": ""
+		},
+		{
+			"key": "bankZipCode",
+			"value": ""
+		},
+		{
+			"key": "bankAdrCity",
+			"value": ""
+		},
+		{
+			"key": "bankAdressLine1",
+			"value": ""
+		},
+		{
+			"key": "bankAdressLine2",
+			"value": ""
+		},
+		{
+			"key": "bankDetailsCustomerGAVId",
+			"value": ""
+		},
+		{
+			"key": "contratGAVId",
+			"value": ""
+		},
+		{
+			"key": "contractGAVId",
+			"value": ""
+		},
+		{
+			"key": "contractGAVNumber",
+			"value": ""
+		}
+	]
+}
